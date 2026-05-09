@@ -417,7 +417,7 @@ function BreweriesSection({ beers }) {
     return Object.values(m)
       .map(c => ({ ...c, avg: c.scores.length ? +(c.scores.reduce((a, b) => a + b) / c.scores.length).toFixed(1) : null }))
       .filter(b => b.count >= 2)
-      .sort((a, b) => b.count - a.count || (b.avg || 0) - (a.avg || 0))
+      .sort((a, b) => (b.avg || 0) - (a.avg || 0) || b.count - a.count)
       .slice(0, 12)
   }, [beers])
 
@@ -757,27 +757,68 @@ function AbvSection({ beers }) {
 }
 
 // ── BEER TABLE ────────────────────────────────────────────────────────────────
+const COLUMNS = [
+  { key: 'name',    label: 'Beer',  align: 'left'   },
+  { key: 'style',   label: 'Style', align: 'center' },
+  { key: 'Hlynur',  label: 'H',     align: 'center' },
+  { key: 'Robert',  label: 'R',     align: 'center' },
+  { key: 'Steinar', label: 'S',     align: 'center' },
+  { key: 'Palli',   label: 'P',     align: 'center' },
+  { key: 'avg',     label: 'Avg',   align: 'center' },
+  { key: 'abv',     label: 'ABV',   align: 'center' },
+]
+
 function BeerTable({ beers }) {
-  const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState('avg')
+  const [search, setSearch]   = useState('')
+  const [sortBy, setSortBy]   = useState('avg')
+  const [sortDir, setSortDir] = useState('desc')
   const [country, setCountry] = useState('All')
-  const [style, setStyle] = useState('All')
+  const [style, setStyle]     = useState('All')
 
   const countries = useMemo(() => ['All', ...new Set(beers.map(b => b.country).filter(Boolean).sort())], [beers])
   const styles    = useMemo(() => ['All', ...new Set(beers.map(b => b.style).filter(Boolean).sort())], [beers])
 
+  function handleSort(key) {
+    if (key === sortBy) {
+      setSortDir(d => d === 'desc' ? 'asc' : 'desc')
+    } else {
+      setSortBy(key)
+      setSortDir('desc')
+    }
+  }
+
   const filtered = useMemo(() => {
     let list = [...beers]
-    if (search) list = list.filter(b => b.name.toLowerCase().includes(search.toLowerCase()) || (b.brewery || '').toLowerCase().includes(search.toLowerCase()))
+    if (search) list = list.filter(b =>
+      b.name.toLowerCase().includes(search.toLowerCase()) ||
+      (b.brewery || '').toLowerCase().includes(search.toLowerCase())
+    )
     if (country !== 'All') list = list.filter(b => b.country === country)
     if (style !== 'All') list = list.filter(b => b.style === style)
-    return list.sort((a, b) => {
-      if (sortBy === 'avg') return (b.avg || 0) - (a.avg || 0)
-      if (sortBy === 'name') return a.name.localeCompare(b.name)
-      if (sortBy === 'abv') return (b.abv || 0) - (a.abv || 0)
-      return b.ratingCount - a.ratingCount
+
+    list.sort((a, b) => {
+      let av, bv
+      if (RATERS.includes(sortBy)) {
+        av = a.ratings[sortBy] ?? null
+        bv = b.ratings[sortBy] ?? null
+      } else if (sortBy === 'name') {
+        return sortDir === 'asc'
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name)
+      } else if (sortBy === 'style') {
+        const as = a.style || '', bs = b.style || ''
+        return sortDir === 'asc' ? as.localeCompare(bs) : bs.localeCompare(as)
+      } else {
+        av = a[sortBy] ?? null
+        bv = b[sortBy] ?? null
+      }
+      if (av == null && bv == null) return 0
+      if (av == null) return 1
+      if (bv == null) return -1
+      return sortDir === 'asc' ? av - bv : bv - av
     })
-  }, [beers, search, sortBy, country, style])
+    return list
+  }, [beers, search, sortBy, sortDir, country, style])
 
   const ctrl = {
     background: 'rgba(255,255,255,0.06)',
@@ -790,15 +831,16 @@ function BeerTable({ beers }) {
     caretColor: '#ff9f0a',
   }
 
+  const colTemplate = '1fr 100px 52px 52px 52px 52px 52px 48px'
+
   return (
     <section>
       <SectionHead>All Beers</SectionHead>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14, alignItems: 'center' }}>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" style={{ ...ctrl, flex: 1, minWidth: 160 }} />
         {[
-          ['sort', sortBy, setSortBy, [['avg','Top Rated'],['name','A–Z'],['abv','ABV'],['ratingCount','Most Rated']]],
           ['country', country, setCountry, countries.map(c => [c, c])],
-          ['style', style, setStyle, styles.map(s => [s, s])],
+          ['style',   style,   setStyle,   styles.map(s => [s, s])],
         ].map(([, val, set, opts]) => (
           <select key={String(opts[0])} value={val} onChange={e => set(e.target.value)} style={{ ...ctrl, cursor: 'pointer' }}>
             {opts.map(([v, l]) => <option key={v} value={v} style={{ background: '#0e0e18' }}>{l}</option>)}
@@ -809,21 +851,39 @@ function BeerTable({ beers }) {
 
       <div style={{ ...GLASS, borderRadius: 20, overflow: 'hidden', padding: 0 }}>
         <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 100px 52px 52px 52px 52px 52px 48px',
+          display: 'grid', gridTemplateColumns: colTemplate,
           padding: '11px 18px', borderBottom: '1px solid rgba(255,255,255,0.07)',
-          fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.25)',
-          letterSpacing: 2,
         }}>
-          <span>Beer</span><span style={{ textAlign: 'center' }}>Style</span>
-          <span style={{ textAlign: 'center' }}>H</span><span style={{ textAlign: 'center' }}>R</span>
-          <span style={{ textAlign: 'center' }}>S</span><span style={{ textAlign: 'center' }}>P</span>
-          <span style={{ textAlign: 'center' }}>Avg</span><span style={{ textAlign: 'center' }}>ABV</span>
+          {COLUMNS.map(col => {
+            const active = sortBy === col.key
+            return (
+              <div
+                key={col.key}
+                onClick={() => handleSort(col.key)}
+                style={{
+                  textAlign: col.align,
+                  fontSize: 9, fontWeight: 700, letterSpacing: 2,
+                  color: active ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)',
+                  cursor: 'pointer', userSelect: 'none',
+                  display: 'flex', alignItems: 'center',
+                  justifyContent: col.align === 'center' ? 'center' : 'flex-start',
+                  gap: 4,
+                  transition: 'color 0.15s',
+                }}
+              >
+                {col.label}
+                {active && (
+                  <span style={{ fontSize: 8, opacity: 0.7 }}>{sortDir === 'desc' ? '▼' : '▲'}</span>
+                )}
+              </div>
+            )
+          })}
         </div>
         {filtered.map((b, i) => (
           <div
             key={b.id}
             style={{
-              display: 'grid', gridTemplateColumns: '1fr 100px 52px 52px 52px 52px 52px 48px',
+              display: 'grid', gridTemplateColumns: colTemplate,
               padding: '11px 18px',
               borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
               alignItems: 'center', transition: 'background 0.1s',
@@ -844,7 +904,9 @@ function BeerTable({ beers }) {
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <ScoreBadge score={b.avg} size="sm" />
             </div>
-            <div style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.3)', fontVariantNumeric: 'tabular-nums' }}>{b.abv != null ? `${b.abv}%` : '—'}</div>
+            <div style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.3)', fontVariantNumeric: 'tabular-nums' }}>
+              {b.abv != null ? `${b.abv}%` : '—'}
+            </div>
           </div>
         ))}
       </div>
