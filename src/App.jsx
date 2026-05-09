@@ -38,7 +38,7 @@ const STYLE_TO_RADAR = {
   'Double IPA': 'IPA', 'NEDIPA': 'IPA', 'Milkshake IPA': 'IPA',
   'Sumar session IPA': 'IPA',
   'Amber Ale': 'Amber Ale',
-  'Wheat Beer': 'Wheat Beer',
+  'Wheat Beer': 'Wheat Beer', 'Hveitibjór': 'Wheat Beer',
   'Belgian Ale': 'Belgian', 'Blonde': 'Belgian', 'Trappist': 'Belgian', 'Belgian IPA': 'Belgian',
 }
 
@@ -419,6 +419,7 @@ function RatersSection({ beers }) {
     labels: RADAR_CATEGORIES,
     datasets: RATERS.map(r => ({
       label: r,
+      spanGaps: false,
       data: RADAR_CATEGORIES.map(cat => {
         const scores = beers
           .filter(b => STYLE_TO_RADAR[b.style] === cat && b.ratings[r] != null)
@@ -438,7 +439,7 @@ function RatersSection({ beers }) {
     maintainAspectRatio: false,
     scales: {
       r: {
-        min: 40, max: 100,
+        min: 0, max: 100,
         grid: { color: gridColor },
         angleLines: { color: gridColor },
         pointLabels: { color: '#8888a8', font: { size: 11 } },
