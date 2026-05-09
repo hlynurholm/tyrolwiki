@@ -1,0 +1,1136 @@
+[
+  {
+    "id": 0,
+    "name": "Amber Bastard",
+    "style": "Amber Ale",
+    "brewery": "Bastard",
+    "country": "Iceland",
+    "abv": 4.9,
+    "ratings": {
+      "Hlynur": 70.0,
+      "Robert": 60.0,
+      "Steinar": 65.0,
+      "Palli": 70.0
+    },
+    "avg": 66.2,
+    "ratingCount": 4
+  },
+  {
+    "id": 1,
+    "name": "Barfluga",
+    "style": "Lager",
+    "brewery": "Rvk Brewery",
+    "country": "Iceland",
+    "abv": 5.2,
+    "ratings": {
+      "Palli": 70.0
+    },
+    "avg": 70.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 2,
+    "name": "Basl",
+    "style": "IPA",
+    "brewery": "Malbygg",
+    "country": "Iceland",
+    "abv": 6.5,
+    "ratings": {
+      "Robert": 87.0
+    },
+    "avg": 87.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 3,
+    "name": "Big Wave",
+    "style": "Golden Ale",
+    "brewery": "Kona",
+    "country": "USA",
+    "abv": 4.4,
+    "ratings": {
+      "Hlynur": 85.0
+    },
+    "avg": 85.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 4,
+    "name": "Bjór 101",
+    "style": "Pale Ale",
+    "brewery": "Rvk Brewery",
+    "country": "Iceland",
+    "abv": null,
+    "ratings": {
+      "Hlynur": 73.0,
+      "Steinar": 78.0
+    },
+    "avg": 75.5,
+    "ratingCount": 2
+  },
+  {
+    "id": 5,
+    "name": "Boli",
+    "style": "Lager",
+    "brewery": "Ölgerðin",
+    "country": "Iceland",
+    "abv": 5.6,
+    "ratings": {
+      "Hlynur": 10.0,
+      "Robert": 84.0,
+      "Steinar": 70.0,
+      "Palli": 75.0
+    },
+    "avg": 59.8,
+    "ratingCount": 4
+  },
+  {
+    "id": 6,
+    "name": "Bríó",
+    "style": "Lager",
+    "brewery": "Ölgerðin",
+    "country": "Iceland",
+    "abv": 7.5,
+    "ratings": {
+      "Hlynur": 97.0,
+      "Robert": 80.0,
+      "Steinar": 80.0,
+      "Palli": 70.0
+    },
+    "avg": 81.8,
+    "ratingCount": 4
+  },
+  {
+    "id": 7,
+    "name": "Budweiser",
+    "style": "Light Lager",
+    "brewery": "AB Inbev",
+    "country": "UK",
+    "abv": 4.4,
+    "ratings": {
+      "Palli": 65.0
+    },
+    "avg": 65.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 8,
+    "name": "Carlsberg",
+    "style": "Light Lager",
+    "brewery": "Catlsberg",
+    "country": "Denmark",
+    "abv": 5.0,
+    "ratings": {
+      "Hlynur": 57.0,
+      "Steinar": 20.0,
+      "Palli": 20.0
+    },
+    "avg": 32.3,
+    "ratingCount": 3
+  },
+  {
+    "id": 9,
+    "name": "Chimay",
+    "style": "Trappist",
+    "brewery": "Bieres de Chimay N.V.",
+    "country": "Belgium",
+    "abv": 9.0,
+    "ratings": {
+      "Hlynur": 100.0,
+      "Robert": 100.0,
+      "Steinar": 100.0,
+      "Palli": 100.0
+    },
+    "avg": 100.0,
+    "ratingCount": 4
+  },
+  {
+    "id": 10,
+    "name": "Chouffe soleil",
+    "style": "Belgian Ale",
+    "brewery": "Brasserie d'achouffe",
+    "country": "Belgium",
+    "abv": 6.0,
+    "ratings": {
+      "Steinar": 70.0,
+      "Palli": 88.0
+    },
+    "avg": 79.0,
+    "ratingCount": 2
+  },
+  {
+    "id": 11,
+    "name": "Classic",
+    "style": "Lager",
+    "brewery": "Tuborg",
+    "country": "Denmark",
+    "abv": 4.6,
+    "ratings": {
+      "Hlynur": 40.0,
+      "Robert": 55.0,
+      "Steinar": 50.0,
+      "Palli": 55.0
+    },
+    "avg": 50.0,
+    "ratingCount": 4
+  },
+  {
+    "id": 12,
+    "name": "Clockwork Tangerine",
+    "style": "Session IPA",
+    "brewery": "Brewdog",
+    "country": "Scotland",
+    "abv": 4.5,
+    "ratings": {
+      "Robert": 65.0,
+      "Steinar": 84.0
+    },
+    "avg": 74.5,
+    "ratingCount": 2
+  },
+  {
+    "id": 13,
+    "name": "Corona",
+    "style": "Lager",
+    "brewery": "Cerveceria Modelo",
+    "country": "Mexico",
+    "abv": 4.5,
+    "ratings": {
+      "Hlynur": 40.0,
+      "Robert": 60.0,
+      "Steinar": 70.0,
+      "Palli": 70.0
+    },
+    "avg": 60.0,
+    "ratingCount": 4
+  },
+  {
+    "id": 14,
+    "name": "Dumbo",
+    "style": "Session IPA",
+    "brewery": "Rvk Brewery",
+    "country": "Iceland",
+    "abv": null,
+    "ratings": {
+      "Hlynur": 73.0,
+      "Robert": 79.0,
+      "Steinar": 75.0
+    },
+    "avg": 75.7,
+    "ratingCount": 3
+  },
+  {
+    "id": 15,
+    "name": "Dynjandi",
+    "style": "IPA",
+    "brewery": "Dokkan Bruggús",
+    "country": "Iceland",
+    "abv": 5.9,
+    "ratings": {
+      "Steinar": 70.0
+    },
+    "avg": 70.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 16,
+    "name": "Einstök Pale Ale",
+    "style": "Pale Ale",
+    "brewery": "Einstök",
+    "country": "Iceland",
+    "abv": 5.6,
+    "ratings": {
+      "Hlynur": 65.0,
+      "Robert": 65.0,
+      "Steinar": 60.0,
+      "Palli": 60.0
+    },
+    "avg": 62.5,
+    "ratingCount": 4
+  },
+  {
+    "id": 17,
+    "name": "Einstök White ale",
+    "style": "Wheat Beer",
+    "brewery": "Einstök",
+    "country": "Iceland",
+    "abv": 5.2,
+    "ratings": {
+      "Hlynur": 70.0,
+      "Steinar": 77.0,
+      "Palli": 70.0
+    },
+    "avg": 72.3,
+    "ratingCount": 3
+  },
+  {
+    "id": 18,
+    "name": "Ekkert Stress",
+    "style": "Kveik",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 3.9,
+    "ratings": {
+      "Hlynur": 88.0,
+      "Robert": 79.0,
+      "Palli": 85.0
+    },
+    "avg": 84.0,
+    "ratingCount": 3
+  },
+  {
+    "id": 19,
+    "name": "Er of snemmt að fá sér?",
+    "style": "Lager",
+    "brewery": "Smiðjan",
+    "country": "Iceland",
+    "abv": 5.0,
+    "ratings": {
+      "Hlynur": 70.0
+    },
+    "avg": 70.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 20,
+    "name": "Er þetta hönnun?",
+    "style": "APA",
+    "brewery": "Lady Brewery",
+    "country": "Iceland",
+    "abv": 4.8,
+    "ratings": {
+      "Robert": 83.0
+    },
+    "avg": 83.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 21,
+    "name": "Erdinger Weissbier",
+    "style": "Wheat Beer",
+    "brewery": "Erdinger Weissbray",
+    "country": "Germany",
+    "abv": 5.3,
+    "ratings": {
+      "Palli": 75.0
+    },
+    "avg": 75.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 22,
+    "name": "Faxe Classic",
+    "style": "Lager",
+    "brewery": "Royal Unibrew",
+    "country": "Denmark",
+    "abv": 4.6,
+    "ratings": {
+      "Palli": 30.0
+    },
+    "avg": 30.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 23,
+    "name": "Freyja",
+    "style": "Wheat Beer",
+    "brewery": "Ölvisholt",
+    "country": "Iceland",
+    "abv": 4.5,
+    "ratings": {
+      "Hlynur": 73.0,
+      "Steinar": 71.0,
+      "Palli": 70.0
+    },
+    "avg": 71.3,
+    "ratingCount": 3
+  },
+  {
+    "id": 24,
+    "name": "Friday",
+    "style": null,
+    "brewery": "Brewers and Union GmbH",
+    "country": "Germany",
+    "abv": null,
+    "ratings": {
+      "Hlynur": 25.0,
+      "Palli": 10.0
+    },
+    "avg": 17.5,
+    "ratingCount": 2
+  },
+  {
+    "id": 25,
+    "name": "Géttódjús",
+    "style": "Zwickel",
+    "brewery": "Ægir Brugghús",
+    "country": "Iceland",
+    "abv": 4.2,
+    "ratings": {
+      "Robert": 80.0,
+      "Steinar": 78.0,
+      "Palli": 78.0
+    },
+    "avg": 78.7,
+    "ratingCount": 3
+  },
+  {
+    "id": 26,
+    "name": "Gölli",
+    "style": "IPA",
+    "brewery": "The Brothers Brewery",
+    "country": "Iceland",
+    "abv": 6.0,
+    "ratings": {
+      "Robert": 91.0
+    },
+    "avg": 91.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 27,
+    "name": "Gull",
+    "style": "Lager",
+    "brewery": "Ölgerðin",
+    "country": "Iceland",
+    "abv": 6.8,
+    "ratings": {
+      "Hlynur": 35.0,
+      "Robert": 20.0,
+      "Steinar": 25.0,
+      "Palli": 15.0
+    },
+    "avg": 23.8,
+    "ratingCount": 4
+  },
+  {
+    "id": 28,
+    "name": "Hanalei",
+    "style": "IPA",
+    "brewery": "Kona",
+    "country": "USA",
+    "abv": 4.5,
+    "ratings": {
+      "Hlynur": 90.0,
+      "Robert": 94.0,
+      "Steinar": 87.0,
+      "Palli": 91.0
+    },
+    "avg": 90.5,
+    "ratingCount": 4
+  },
+  {
+    "id": 29,
+    "name": "Hazy Bastard",
+    "style": "NEIPA",
+    "brewery": "Bastard",
+    "country": "Iceland",
+    "abv": 4.9,
+    "ratings": {
+      "Hlynur": 69.0,
+      "Robert": 82.0,
+      "Steinar": 80.0,
+      "Palli": 79.0
+    },
+    "avg": 77.5,
+    "ratingCount": 4
+  },
+  {
+    "id": 30,
+    "name": "Helga",
+    "style": "Raspberry Sour",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 4.7,
+    "ratings": {
+      "Hlynur": 50.0
+    },
+    "avg": 50.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 31,
+    "name": "Hipster Unicorn",
+    "style": "IPA",
+    "brewery": "Gæðingur",
+    "country": "Iceland",
+    "abv": 6.0,
+    "ratings": {
+      "Hlynur": 82.0,
+      "Robert": 90.0,
+      "Steinar": 65.0
+    },
+    "avg": 79.0,
+    "ratingCount": 3
+  },
+  {
+    "id": 32,
+    "name": "Hoegarden Wit-Blanche",
+    "style": "Wheat Beer",
+    "brewery": "S.A Interbrew Belgium N.V",
+    "country": "Belgium",
+    "abv": 4.9,
+    "ratings": {
+      "Hlynur": 79.0,
+      "Steinar": 82.0,
+      "Palli": 80.0
+    },
+    "avg": 80.3,
+    "ratingCount": 3
+  },
+  {
+    "id": 33,
+    "name": "Houblon Chouffe",
+    "style": "Belgian IPA",
+    "brewery": "Brasserie d'Achouffe",
+    "country": "Belgium",
+    "abv": 9.0,
+    "ratings": {
+      "Hlynur": 85.0,
+      "Robert": 87.0,
+      "Steinar": 95.0
+    },
+    "avg": 89.0,
+    "ratingCount": 3
+  },
+  {
+    "id": 34,
+    "name": "Humar",
+    "style": "Double IPA",
+    "brewery": "Malbygg",
+    "country": "Iceland",
+    "abv": 8.0,
+    "ratings": {
+      "Hlynur": 65.0,
+      "Robert": 90.0
+    },
+    "avg": 77.5,
+    "ratingCount": 2
+  },
+  {
+    "id": 35,
+    "name": "Kaldi",
+    "style": "Lager",
+    "brewery": "Ársskógssandur",
+    "country": "Iceland",
+    "abv": 5.0,
+    "ratings": {
+      "Hlynur": 25.0,
+      "Robert": 60.0,
+      "Steinar": 60.0,
+      "Palli": 75.0
+    },
+    "avg": 55.0,
+    "ratingCount": 4
+  },
+  {
+    "id": 36,
+    "name": "Kisi",
+    "style": "Pale Ale",
+    "brewery": "Malbygg",
+    "country": "Iceland",
+    "abv": 5.5,
+    "ratings": {
+      "Steinar": 80.0
+    },
+    "avg": 80.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 37,
+    "name": "La Trappe - Trappist",
+    "style": "Blonde",
+    "brewery": "La Trappe",
+    "country": "Belgium",
+    "abv": 6.5,
+    "ratings": {
+      "Hlynur": 96.0,
+      "Robert": 70.0
+    },
+    "avg": 83.0,
+    "ratingCount": 2
+  },
+  {
+    "id": 38,
+    "name": "Leffe Blonde",
+    "style": "Belgian Ale",
+    "brewery": "Interbrew",
+    "country": "Belgium",
+    "abv": 6.6,
+    "ratings": {
+      "Hlynur": 78.0,
+      "Robert": 75.0,
+      "Steinar": 85.0,
+      "Palli": 80.0
+    },
+    "avg": 79.5,
+    "ratingCount": 4
+  },
+  {
+    "id": 39,
+    "name": "Leifur",
+    "style": "Nordic Saison",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 4.7,
+    "ratings": {
+      "Hlynur": 90.0,
+      "Robert": 75.0
+    },
+    "avg": 82.5,
+    "ratingCount": 2
+  },
+  {
+    "id": 40,
+    "name": "Leikvangur óttans",
+    "style": "NEDIPA",
+    "brewery": "Böl brewing",
+    "country": "Iceland",
+    "abv": 8.0,
+    "ratings": {
+      "Palli": 75.0
+    },
+    "avg": 75.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 41,
+    "name": "Lite Lime",
+    "style": "Ávaxta- og kryddbjór",
+    "brewery": "Víking",
+    "country": "Iceland",
+    "abv": 4.4,
+    "ratings": {
+      "Hlynur": 40.0,
+      "Robert": 63.0,
+      "Steinar": 70.0,
+      "Palli": 25.0
+    },
+    "avg": 49.5,
+    "ratingCount": 4
+  },
+  {
+    "id": 42,
+    "name": "Mango Passionfruit Skyrsour",
+    "style": "Sour",
+    "brewery": "Smiðjan",
+    "country": "Iceland",
+    "abv": 4.5,
+    "ratings": {
+      "Steinar": 88.0
+    },
+    "avg": 88.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 43,
+    "name": "Midomnatten",
+    "style": "IPA",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 6.6,
+    "ratings": {},
+    "avg": null,
+    "ratingCount": 0
+  },
+  {
+    "id": 44,
+    "name": "Naggur",
+    "style": "Sumar session IPA",
+    "brewery": "Segull 67",
+    "country": "Iceland",
+    "abv": 4.6,
+    "ratings": {
+      "Robert": 75.0
+    },
+    "avg": 75.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 45,
+    "name": "Old Foghorn",
+    "style": "Barleywine Style Ale",
+    "brewery": "Anchor & Brewing",
+    "country": "USA",
+    "abv": 9.4,
+    "ratings": {
+      "Hlynur": 64.0
+    },
+    "avg": 64.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 46,
+    "name": "Peroni",
+    "style": "Light Lager",
+    "brewery": "Birra Peroni",
+    "country": "Italy",
+    "abv": 5.1,
+    "ratings": {
+      "Hlynur": 92.0,
+      "Robert": 60.0,
+      "Steinar": 55.0,
+      "Palli": 75.0
+    },
+    "avg": 70.5,
+    "ratingCount": 4
+  },
+  {
+    "id": 47,
+    "name": "Pilsner Urqel",
+    "style": "Pilsner",
+    "brewery": "Urqell",
+    "country": "Czech Republic",
+    "abv": 4.4,
+    "ratings": {
+      "Robert": 75.0,
+      "Palli": 75.0
+    },
+    "avg": 75.0,
+    "ratingCount": 2
+  },
+  {
+    "id": 48,
+    "name": "PUNK",
+    "style": "IPA",
+    "brewery": "Brewdog",
+    "country": "Scotland",
+    "abv": 5.6,
+    "ratings": {
+      "Hlynur": 70.0,
+      "Robert": 70.0,
+      "Steinar": 75.0,
+      "Palli": 70.0
+    },
+    "avg": 71.2,
+    "ratingCount": 4
+  },
+  {
+    "id": 49,
+    "name": "Renslip",
+    "style": "Light Lager",
+    "brewery": "Smiðjan",
+    "country": "Iceland",
+    "abv": 4.7,
+    "ratings": {
+      "Steinar": 40.0
+    },
+    "avg": 40.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 50,
+    "name": "Sæunn dansar mangó",
+    "style": "Milkshake IPA",
+    "brewery": "Dokkan Bruggús",
+    "country": "Iceland",
+    "abv": 4.8,
+    "ratings": {
+      "Steinar": 69.0
+    },
+    "avg": 69.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 51,
+    "name": "Sigla Humlafley",
+    "style": "Session IPA",
+    "brewery": "The Brothers Brewery",
+    "country": "Iceland",
+    "abv": 5.0,
+    "ratings": {
+      "Hlynur": 65.0,
+      "Robert": 75.0
+    },
+    "avg": 70.0,
+    "ratingCount": 2
+  },
+  {
+    "id": 52,
+    "name": "Sjarmör",
+    "style": "Lager",
+    "brewery": "Segull 67",
+    "country": "Iceland",
+    "abv": 4.6,
+    "ratings": {
+      "Steinar": 60.0
+    },
+    "avg": 60.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 53,
+    "name": "Skúli",
+    "style": "Pale Ale",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 4.4,
+    "ratings": {
+      "Hlynur": 72.0
+    },
+    "avg": 72.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 54,
+    "name": "Sleipnir",
+    "style": "Pale Ale",
+    "brewery": "Ölvisholt",
+    "country": "Iceland",
+    "abv": 5.4,
+    "ratings": {
+      "Hlynur": 70.0
+    },
+    "avg": 70.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 55,
+    "name": "Slots Classic",
+    "style": "Amber Ale",
+    "brewery": "Maribo",
+    "country": "Denmark",
+    "abv": 4.6,
+    "ratings": {
+      "Hlynur": 45.0,
+      "Robert": 13.0,
+      "Steinar": 25.0,
+      "Palli": 50.0
+    },
+    "avg": 33.2,
+    "ratingCount": 4
+  },
+  {
+    "id": 56,
+    "name": "Snorri",
+    "style": "Íslenskt Öl",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 5.3,
+    "ratings": {
+      "Hlynur": 75.0,
+      "Robert": 73.0,
+      "Steinar": 75.0,
+      "Palli": 85.0
+    },
+    "avg": 77.0,
+    "ratingCount": 4
+  },
+  {
+    "id": 57,
+    "name": "Sólveig",
+    "style": "Wheat Beer",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 6.0,
+    "ratings": {
+      "Hlynur": 79.0,
+      "Palli": 82.0
+    },
+    "avg": 80.5,
+    "ratingCount": 2
+  },
+  {
+    "id": 58,
+    "name": "Stella Artois",
+    "style": "Light Lager",
+    "brewery": "AB inbev",
+    "country": "Belgium",
+    "abv": 5.0,
+    "ratings": {
+      "Hlynur": 63.0,
+      "Steinar": 65.0,
+      "Palli": 75.0
+    },
+    "avg": 67.7,
+    "ratingCount": 3
+  },
+  {
+    "id": 59,
+    "name": "Sunday p/ale",
+    "style": "Pale Ale",
+    "brewery": "Brewers and Union GmbH",
+    "country": "Germany",
+    "abv": 5.5,
+    "ratings": {
+      "Hlynur": 85.0,
+      "Steinar": 90.0
+    },
+    "avg": 87.5,
+    "ratingCount": 2
+  },
+  {
+    "id": 60,
+    "name": "Sunna",
+    "style": "Pale Ale",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 5.0,
+    "ratings": {
+      "Hlynur": 89.0,
+      "Robert": 60.0,
+      "Steinar": 45.0,
+      "Palli": 80.0
+    },
+    "avg": 68.5,
+    "ratingCount": 4
+  },
+  {
+    "id": 61,
+    "name": "Team Freedom",
+    "style": "New England IPA",
+    "brewery": "Benchwarmers brewing",
+    "country": "Sweden",
+    "abv": 6.8,
+    "ratings": {
+      "Hlynur": 30.0,
+      "Robert": 87.0,
+      "Steinar": 80.0
+    },
+    "avg": 65.7,
+    "ratingCount": 3
+  },
+  {
+    "id": 62,
+    "name": "Thule",
+    "style": "Lager",
+    "brewery": "Víking",
+    "country": "Iceland",
+    "abv": 5.0,
+    "ratings": {
+      "Steinar": 15.0,
+      "Palli": 40.0
+    },
+    "avg": 27.5,
+    "ratingCount": 2
+  },
+  {
+    "id": 63,
+    "name": "Tubborg Julebryg",
+    "style": "European Dark Lager",
+    "brewery": "Ölgerðin",
+    "country": "Iceland",
+    "abv": 5.6,
+    "ratings": {
+      "Hlynur": 81.0,
+      "Robert": 71.0,
+      "Steinar": 80.0,
+      "Palli": 80.0
+    },
+    "avg": 78.0,
+    "ratingCount": 4
+  },
+  {
+    "id": 64,
+    "name": "Tuborg Grön",
+    "style": "Lager",
+    "brewery": "Ölgerðin",
+    "country": "Denmark",
+    "abv": 4.5,
+    "ratings": {
+      "Hlynur": 52.0,
+      "Robert": 50.0,
+      "Steinar": 50.0,
+      "Palli": 40.0
+    },
+    "avg": 48.0,
+    "ratingCount": 4
+  },
+  {
+    "id": 65,
+    "name": "Úlfey",
+    "style": "IPA",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 7.5,
+    "ratings": {
+      "Hlynur": 78.0,
+      "Robert": 93.0,
+      "Steinar": 68.0
+    },
+    "avg": 79.7,
+    "ratingCount": 3
+  },
+  {
+    "id": 66,
+    "name": "Úlfrún",
+    "style": "Double IPA",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 4.5,
+    "ratings": {
+      "Hlynur": 85.0,
+      "Robert": 83.0,
+      "Steinar": 93.0,
+      "Palli": 82.0
+    },
+    "avg": 85.8,
+    "ratingCount": 4
+  },
+  {
+    "id": 67,
+    "name": "Úlfur",
+    "style": "IPA",
+    "brewery": "Borg",
+    "country": "Iceland",
+    "abv": 5.9,
+    "ratings": {
+      "Hlynur": 87.0,
+      "Robert": 80.0,
+      "Steinar": 80.0,
+      "Palli": 78.0
+    },
+    "avg": 81.2,
+    "ratingCount": 4
+  },
+  {
+    "id": 68,
+    "name": "Víking",
+    "style": "Lager",
+    "brewery": "Víking",
+    "country": "Iceland",
+    "abv": 5.6,
+    "ratings": {
+      "Hlynur": 55.0,
+      "Robert": 15.0,
+      "Steinar": 0.0,
+      "Palli": 50.0
+    },
+    "avg": 30.0,
+    "ratingCount": 4
+  },
+  {
+    "id": 69,
+    "name": "Víking Rökkr",
+    "style": "Amber Ale",
+    "brewery": "Víking",
+    "country": "Iceland",
+    "abv": 4.6,
+    "ratings": {
+      "Hlynur": 18.0,
+      "Robert": 10.0,
+      "Palli": 55.0
+    },
+    "avg": 27.7,
+    "ratingCount": 3
+  },
+  {
+    "id": 70,
+    "name": "Volcania",
+    "style": "IPA",
+    "brewery": "Glacierfire",
+    "country": "Iceland",
+    "abv": 6.5,
+    "ratings": {
+      "Hlynur": 15.0
+    },
+    "avg": 15.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 71,
+    "name": "Yuzu lager",
+    "style": "Rice Lager",
+    "brewery": "Rvk Brewery",
+    "country": "Iceland",
+    "abv": 4.5,
+    "ratings": {
+      "Hlynur": 83.0,
+      "Robert": 87.0,
+      "Steinar": 81.0,
+      "Palli": 85.0
+    },
+    "avg": 84.0,
+    "ratingCount": 4
+  },
+  {
+    "id": 72,
+    "name": "El Grillo",
+    "style": "IPA",
+    "brewery": "Ægir",
+    "country": "Iceland",
+    "abv": 5.6,
+    "ratings": {
+      "Hlynur": 60.0,
+      "Robert": 78.0,
+      "Steinar": 40.0,
+      "Palli": 71.0
+    },
+    "avg": 62.2,
+    "ratingCount": 4
+  },
+  {
+    "id": 73,
+    "name": "Albani Julebryg",
+    "style": "Lager",
+    "brewery": "Albani",
+    "country": "Iceland",
+    "abv": 7.0,
+    "ratings": {
+      "Hlynur": 92.0,
+      "Robert": 94.0,
+      "Steinar": 80.0,
+      "Palli": 85.0
+    },
+    "avg": 87.8,
+    "ratingCount": 4
+  },
+  {
+    "id": 74,
+    "name": "Citra Smash",
+    "style": "Lager",
+    "brewery": "Benchwarmers brewing",
+    "country": "Iceland",
+    "abv": null,
+    "ratings": {
+      "Hlynur": 25.0,
+      "Robert": 68.0,
+      "Steinar": 60.0,
+      "Palli": 70.0
+    },
+    "avg": 55.8,
+    "ratingCount": 4
+  },
+  {
+    "id": 75,
+    "name": "CLWB Tropica",
+    "style": "IPA",
+    "brewery": "Tiny Rebel",
+    "country": "UK",
+    "abv": 5.5,
+    "ratings": {
+      "Hlynur": 70.0,
+      "Robert": 65.0,
+      "Steinar": 75.0,
+      "Palli": 70.0
+    },
+    "avg": 70.0,
+    "ratingCount": 4
+  },
+  {
+    "id": 76,
+    "name": "Hrím",
+    "style": "Lager",
+    "brewery": "Rvk Brewery",
+    "country": "Iceland",
+    "abv": null,
+    "ratings": {
+      "Hlynur": 82.0
+    },
+    "avg": 82.0,
+    "ratingCount": 1
+  },
+  {
+    "id": 77,
+    "name": "Super dry",
+    "style": "Lager",
+    "brewery": "Asahi",
+    "country": "Japan",
+    "abv": 5.0,
+    "ratings": {
+      "Robert": 85.0
+    },
+    "avg": 85.0,
+    "ratingCount": 1
+  }
+]
