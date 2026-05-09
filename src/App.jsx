@@ -447,7 +447,7 @@ function RaterProfile({ rater, beers, onClose }) {
       <div style={{ width: '100%', maxWidth: 680, display: 'flex', flexDirection: 'column', gap: 16 }}>
 
         {/* header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
             width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
             background: `radial-gradient(circle at 40% 35%, ${color}cc, ${color}44)`,
@@ -458,13 +458,13 @@ function RaterProfile({ rater, beers, onClose }) {
           }}>{rater[0]}</div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 22, fontWeight: 900, color, letterSpacing: -0.5 }}>{rater}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>{rated.length} beers rated</div>
+            <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 2 }}>{rated.length} beers rated</div>
           </div>
           <button
             onClick={onClose}
             style={{
               width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--border-mid)',
-              background: 'var(--glass-bg)', backdropFilter: 'blur(20px)',
+              background: dark ? 'var(--glass-bg)' : 'rgba(0,0,0,0.06)',
               color: 'var(--text-dim)', fontSize: 16, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
@@ -485,7 +485,7 @@ function RaterProfile({ rater, beers, onClose }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
 
           {/* try next */}
-          <div style={{ ...GLASS, borderRadius: 20, overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', maxHeight: 460 }}>
+          <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', maxHeight: 460 }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>TRY NEXT</span>
             </div>
@@ -521,7 +521,7 @@ function RaterProfile({ rater, beers, onClose }) {
           </div>
 
           {/* all ratings */}
-          <div style={{ ...GLASS, borderRadius: 20, overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', maxHeight: 460 }}>
+          <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', maxHeight: 460 }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>ALL RATINGS</span>
             </div>
