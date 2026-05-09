@@ -17,145 +17,62 @@ ChartJS.register(
 // ── constants ────────────────────────────────────────────────────────────────
 const RATERS = ['Hlynur', 'Robert', 'Steinar', 'Palli']
 const RATER_COLORS = {
-  Hlynur:  '#f59e0b',
-  Robert:  '#60a5fa',
-  Steinar: '#a78bfa',
-  Palli:   '#34d399',
+  Hlynur:  '#a96f10',
+  Robert:  '#2056a0',
+  Steinar: '#6b4a9e',
+  Palli:   '#2e7d52',
 }
 const FLAG = {
   Iceland: '🇮🇸', Belgium: '🇧🇪', Denmark: '🇩🇰', USA: '🇺🇸',
   Germany: '🇩🇪', UK: '🇬🇧', Scotland: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', Mexico: '🇲🇽',
   Italy: '🇮🇹', 'Czech Republic': '🇨🇿', Sweden: '🇸🇪', Japan: '🇯🇵',
 }
-const PALETTE = ['#f59e0b','#60a5fa','#a78bfa','#34d399','#f97316','#f43f5e','#06b6d4','#84cc16','#ec4899','#8b5cf6']
 
 const RADAR_CATEGORIES = ['Lager', 'Pale Ale', 'IPA', 'Amber Ale', 'Wheat Beer', 'Belgian']
 const STYLE_TO_RADAR = {
-  // Lager family
-  'Lager':                 'Lager',
-  'Light Lager':           'Lager',
-  'Pilsner':               'Lager',
-  'Rice Lager':            'Lager',
-  'European Dark Lager':   'Lager',
-  'Zwickel':               'Lager',
-  'Märzen':                'Lager',
-  'Bock':                  'Lager',
-  'Dunkel':                'Lager',
-
-  // Pale Ale / general ale family
-  'Pale Ale':              'Pale Ale',
-  'APA':                   'Pale Ale',
-  'Golden Ale':            'Pale Ale',
-  'Ale':                   'Pale Ale',
-  'Kveik':                 'Pale Ale',
-  'Nordic Saison':         'Pale Ale',
-  'Saison':                'Pale Ale',
-  'Barleywine Style Ale':  'Pale Ale',
-  'Farmhouse Ale':         'Pale Ale',
-
-  // IPA family
-  'IPA':                   'IPA',
-  'Session IPA':           'IPA',
-  'NEIPA':                 'IPA',
-  'Double IPA':            'IPA',
-  'NEDIPA':                'IPA',
-  'Milkshake IPA':         'IPA',
-  'Sumar session IPA':     'IPA',
-  'Belgian IPA':           'IPA',
-  'Black IPA':             'IPA',
-  'Brut IPA':              'IPA',
-
-  // Amber Ale family
-  'Amber Ale':             'Amber Ale',
-  'Red Ale':               'Amber Ale',
-  'Irish Red Ale':         'Amber Ale',
-
-  // Wheat Beer family
-  'Wheat Beer':            'Wheat Beer',
-  'Hveitibjór':            'Wheat Beer',
-  'Hefeweizen':            'Wheat Beer',
-  'Weizen':                'Wheat Beer',
-  'Witbier':               'Wheat Beer',
-  'White Ale':             'Wheat Beer',
-
-  // Belgian family
-  'Belgian Ale':           'Belgian',
-  'Belgískt Öl':           'Belgian',
-  'Blonde':                'Belgian',
-  'Trappist':              'Belgian',
-  'Dubbel':                'Belgian',
-  'Tripel':                'Belgian',
-  'Quadrupel':             'Belgian',
-  'Abbey Ale':             'Belgian',
+  'Lager': 'Lager', 'Light Lager': 'Lager', 'Pilsner': 'Lager',
+  'Rice Lager': 'Lager', 'European Dark Lager': 'Lager', 'Zwickel': 'Lager',
+  'Märzen': 'Lager', 'Bock': 'Lager', 'Dunkel': 'Lager',
+  'Pale Ale': 'Pale Ale', 'APA': 'Pale Ale', 'Golden Ale': 'Pale Ale',
+  'Ale': 'Pale Ale', 'Kveik': 'Pale Ale', 'Nordic Saison': 'Pale Ale',
+  'Saison': 'Pale Ale', 'Barleywine Style Ale': 'Pale Ale', 'Farmhouse Ale': 'Pale Ale',
+  'IPA': 'IPA', 'Session IPA': 'IPA', 'NEIPA': 'IPA',
+  'Double IPA': 'IPA', 'NEDIPA': 'IPA', 'Milkshake IPA': 'IPA',
+  'Sumar session IPA': 'IPA', 'Belgian IPA': 'IPA', 'Black IPA': 'IPA', 'Brut IPA': 'IPA',
+  'Amber Ale': 'Amber Ale', 'Red Ale': 'Amber Ale', 'Irish Red Ale': 'Amber Ale',
+  'Wheat Beer': 'Wheat Beer', 'Hveitibjór': 'Wheat Beer', 'Hefeweizen': 'Wheat Beer',
+  'Weizen': 'Wheat Beer', 'Witbier': 'Wheat Beer', 'White Ale': 'Wheat Beer',
+  'Belgian Ale': 'Belgian', 'Belgískt Öl': 'Belgian', 'Blonde': 'Belgian',
+  'Trappist': 'Belgian', 'Dubbel': 'Belgian', 'Tripel': 'Belgian',
+  'Quadrupel': 'Belgian', 'Abbey Ale': 'Belgian',
 }
 
-ChartJS.defaults.font = { family: 'Inter, system-ui, sans-serif' }
-ChartJS.defaults.color = '#8888a8'
+ChartJS.defaults.font = { family: 'Inter, system-ui, sans-serif', size: 11 }
+ChartJS.defaults.color = '#b2b0a9'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 function scoreColor(s) {
-  if (s == null) return '#55556a'
-  if (s >= 85) return '#22c55e'
-  if (s >= 70) return '#f59e0b'
-  if (s >= 50) return '#f97316'
-  return '#f87171'
+  if (s == null) return '#b2b0a9'
+  if (s >= 85) return '#2e7d52'
+  if (s >= 70) return '#a96f10'
+  if (s >= 50) return '#c45a20'
+  return '#b83030'
 }
 
 function trunc(str, n) {
   return str && str.length > n ? str.slice(0, n) + '…' : str
 }
 
-// ── tiny components ───────────────────────────────────────────────────────────
-function ScoreBadge({ score, size = 'md' }) {
-  if (score == null) return <span style={{ color: 'var(--text3)', fontSize: 13 }}>–</span>
-  const fs = size === 'lg' ? 22 : size === 'sm' ? 12 : 15
-  return (
-    <span style={{ fontWeight: 700, fontSize: fs, color: scoreColor(score), fontVariantNumeric: 'tabular-nums' }}>
-      {score.toFixed(1)}
-    </span>
-  )
-}
-
-function StatCard({ label, value, sub }) {
-  return (
-    <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 28px', flex: 1, minWidth: 140 }}>
-      <div style={{ fontSize: 38, fontWeight: 900, letterSpacing: -1, color: 'var(--amber)' }}>{value}</div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text3)', marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.8 }}>{label}</div>
-      {sub && <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 2 }}>{sub}</div>}
-    </div>
-  )
-}
-
-function SectionHead({ children }) {
-  return <h2 style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'var(--text3)', marginBottom: 20 }}>{children}</h2>
-}
-
-function Card({ children, style }) {
-  return (
-    <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 14, padding: '20px 18px', ...style }}>
-      {children}
-    </div>
-  )
-}
-
-function CardLabel({ children }) {
-  return (
-    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 14 }}>
-      {children}
-    </div>
-  )
-}
-
 // ── chart theme ───────────────────────────────────────────────────────────────
-const gridColor = 'rgba(255,255,255,0.05)'
+const gridColor = 'rgba(0,0,0,0.05)'
 const tooltipStyle = {
-  backgroundColor: '#1c1c28',
-  borderColor: 'rgba(255,255,255,0.12)',
+  backgroundColor: '#ffffff',
+  borderColor: 'rgba(0,0,0,0.1)',
   borderWidth: 1,
-  titleColor: '#eeeef8',
-  bodyColor: '#8888a8',
-  padding: 10,
-  cornerRadius: 8,
+  titleColor: '#1a1917',
+  bodyColor: '#706f6a',
+  padding: 12,
+  cornerRadius: 6,
 }
 
 const hBarOpts = (maxVal) => ({
@@ -166,17 +83,56 @@ const hBarOpts = (maxVal) => ({
   scales: {
     x: {
       grid: { color: gridColor },
-      ticks: { color: '#55556a', font: { size: 11 } },
+      ticks: { color: '#b2b0a9', font: { size: 10 } },
       max: maxVal,
       border: { color: 'transparent' },
     },
     y: {
       grid: { display: false },
-      ticks: { color: '#8888a8', font: { size: 11 }, maxRotation: 0 },
+      ticks: { color: '#706f6a', font: { size: 11 }, maxRotation: 0 },
       border: { color: 'transparent' },
     },
   },
 })
+
+// ── tiny components ───────────────────────────────────────────────────────────
+function ScoreBadge({ score, size = 'md' }) {
+  if (score == null) return <span style={{ color: '#b2b0a9', fontSize: 13 }}>—</span>
+  const fs = size === 'lg' ? 20 : size === 'sm' ? 12 : 14
+  return (
+    <span style={{ fontWeight: 700, fontSize: fs, color: scoreColor(score), fontVariantNumeric: 'tabular-nums', letterSpacing: -0.3 }}>
+      {score.toFixed(1)}
+    </span>
+  )
+}
+
+function SectionHead({ children }) {
+  return (
+    <h2 style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 3, color: 'var(--text3)', marginBottom: 24 }}>
+      {children}
+    </h2>
+  )
+}
+
+function Card({ children, style }) {
+  return (
+    <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 10, padding: '24px', ...style }}>
+      {children}
+    </div>
+  )
+}
+
+function CardLabel({ children }) {
+  return (
+    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: 2.5, marginBottom: 18 }}>
+      {children}
+    </div>
+  )
+}
+
+function Divider() {
+  return <div style={{ height: 1, background: 'var(--border)', margin: '0 0 52px' }} />
+}
 
 // ── ADD BEER FORM ─────────────────────────────────────────────────────────────
 function AddBeerForm({ beers, onAdd }) {
@@ -184,9 +140,9 @@ function AddBeerForm({ beers, onAdd }) {
   const blank = { name: '', style: '', brewery: '', country: '', abv: '', Hlynur: '', Robert: '', Steinar: '', Palli: '' }
   const [form, setForm] = useState(blank)
 
-  const styleOpts    = useMemo(() => [...new Set(beers.map(b => b.style).filter(Boolean).sort())], [beers])
-  const breweryOpts  = useMemo(() => [...new Set(beers.map(b => b.brewery).filter(Boolean).sort())], [beers])
-  const countryOpts  = useMemo(() => [...new Set(beers.map(b => b.country).filter(Boolean).sort())], [beers])
+  const styleOpts   = useMemo(() => [...new Set(beers.map(b => b.style).filter(Boolean).sort())], [beers])
+  const breweryOpts = useMemo(() => [...new Set(beers.map(b => b.brewery).filter(Boolean).sort())], [beers])
+  const countryOpts = useMemo(() => [...new Set(beers.map(b => b.country).filter(Boolean).sort())], [beers])
 
   function set(k, v) { setForm(f => ({ ...f, [k]: v })) }
 
@@ -211,72 +167,73 @@ function AddBeerForm({ beers, onAdd }) {
   }
 
   const inp = {
-    background: 'var(--bg3)', border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 8, padding: '8px 12px', fontSize: 13, color: 'var(--text)',
-    outline: 'none', fontFamily: 'inherit', width: '100%',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '1px solid rgba(0,0,0,0.12)',
+    borderRadius: 0,
+    padding: '6px 0',
+    fontSize: 13,
+    color: 'var(--text)',
+    outline: 'none',
+    fontFamily: 'inherit',
+    width: '100%',
   }
-  const lbl = { fontSize: 10, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: 0.6, display: 'block', marginBottom: 4 }
+  const lbl = {
+    fontSize: 9, color: 'var(--text3)', textTransform: 'uppercase',
+    letterSpacing: 2, display: 'block', marginBottom: 6, fontWeight: 600,
+  }
 
   return (
     <section>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: open ? 16 : 0 }}>
-        <SectionHead style={{ marginBottom: 0 }}>Add a Beer</SectionHead>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <SectionHead>Log a Beer</SectionHead>
         <button
           onClick={() => setOpen(o => !o)}
           style={{
-            fontSize: 12, fontWeight: 600,
-            color: open ? 'var(--text3)' : 'var(--amber)',
-            background: open ? 'var(--bg3)' : 'rgba(245,158,11,0.12)',
-            border: `1px solid ${open ? 'var(--border)' : 'rgba(245,158,11,0.3)'}`,
-            borderRadius: 8, padding: '6px 14px', cursor: 'pointer',
+            fontSize: 11, fontWeight: 600, letterSpacing: 0.5,
+            color: open ? 'var(--text3)' : 'var(--text2)',
+            background: 'none', border: 'none', cursor: 'pointer',
+            marginTop: -24, marginBottom: 24,
+            textDecoration: open ? 'none' : 'underline',
+            textUnderlineOffset: 3,
           }}
         >
-          {open ? 'Cancel' : '+ Add Beer'}
+          {open ? 'cancel' : '+ add'}
         </button>
       </div>
       {open && (
-        <Card>
+        <Card style={{ marginTop: -4 }}>
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 0.6fr', gap: 10, marginBottom: 12 }}>
-              <div>
-                <label style={lbl}>Beer Name *</label>
-                <input list="dl-names" style={inp} value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Chimay Blue" required />
-                <datalist id="dl-names">{beers.map(b => <option key={b.id} value={b.name} />)}</datalist>
-              </div>
-              <div>
-                <label style={lbl}>Style</label>
-                <input list="dl-styles" style={inp} value={form.style} onChange={e => set('style', e.target.value)} placeholder="IPA, Lager…" />
-                <datalist id="dl-styles">{styleOpts.map(s => <option key={s} value={s} />)}</datalist>
-              </div>
-              <div>
-                <label style={lbl}>Brewery</label>
-                <input list="dl-breweries" style={inp} value={form.brewery} onChange={e => set('brewery', e.target.value)} placeholder="Brewery" />
-                <datalist id="dl-breweries">{breweryOpts.map(b => <option key={b} value={b} />)}</datalist>
-              </div>
-              <div>
-                <label style={lbl}>Country</label>
-                <input list="dl-countries" style={inp} value={form.country} onChange={e => set('country', e.target.value)} placeholder="Country" />
-                <datalist id="dl-countries">{countryOpts.map(c => <option key={c} value={c} />)}</datalist>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 0.6fr', gap: '0 24px', marginBottom: 28 }}>
+              {[
+                { key: 'name', label: 'Beer Name *', list: 'dl-names', ph: 'e.g. Chimay Blue', required: true },
+                { key: 'style', label: 'Style', list: 'dl-styles', ph: 'IPA, Lager…' },
+                { key: 'brewery', label: 'Brewery', list: 'dl-breweries', ph: '' },
+                { key: 'country', label: 'Country', list: 'dl-countries', ph: '' },
+              ].map(({ key, label, list, ph, required }) => (
+                <div key={key}>
+                  <label style={lbl}>{label}</label>
+                  <input list={list} style={inp} value={form[key]} onChange={e => set(key, e.target.value)} placeholder={ph} required={required} />
+                </div>
+              ))}
               <div>
                 <label style={lbl}>ABV %</label>
                 <input style={inp} type="number" step="0.1" min="0" max="20" value={form.abv} onChange={e => set('abv', e.target.value)} placeholder="5.0" />
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr) auto', gap: 10, alignItems: 'end' }}>
+            <datalist id="dl-names">{beers.map(b => <option key={b.id} value={b.name} />)}</datalist>
+            <datalist id="dl-styles">{styleOpts.map(s => <option key={s} value={s} />)}</datalist>
+            <datalist id="dl-breweries">{breweryOpts.map(b => <option key={b} value={b} />)}</datalist>
+            <datalist id="dl-countries">{countryOpts.map(c => <option key={c} value={c} />)}</datalist>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr) auto', gap: '0 24px', alignItems: 'end' }}>
               {RATERS.map(r => (
                 <div key={r}>
                   <label style={{ ...lbl, color: RATER_COLORS[r] }}>{r}</label>
-                  <input
-                    style={{ ...inp, borderColor: RATER_COLORS[r] + '44' }}
-                    type="number" min="0" max="100" step="1"
-                    value={form[r]} onChange={e => set(r, e.target.value)}
-                    placeholder="0–100"
-                  />
+                  <input style={{ ...inp, borderBottomColor: RATER_COLORS[r] + '55' }} type="number" min="0" max="100" step="1" value={form[r]} onChange={e => set(r, e.target.value)} placeholder="0–100" />
                 </div>
               ))}
-              <button type="submit" style={{ background: 'var(--amber)', color: '#0a0a0f', fontWeight: 700, fontSize: 13, border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                Add Beer
+              <button type="submit" style={{ background: 'var(--text)', color: 'var(--bg2)', fontWeight: 600, fontSize: 12, letterSpacing: 0.5, border: 'none', borderRadius: 6, padding: '9px 20px', cursor: 'pointer', whiteSpace: 'nowrap', alignSelf: 'end', marginBottom: 1 }}>
+                Add
               </button>
             </div>
           </form>
@@ -306,17 +263,17 @@ function CountriesSection({ beers }) {
   return (
     <section>
       <SectionHead>By Country</SectionHead>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
         {data.map(c => (
-          <Card key={c.country} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ fontSize: 30 }}>{FLAG[c.country] || '🍺'}</div>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>{c.country}</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, color: 'var(--text3)' }}>{c.count} beer{c.count !== 1 ? 's' : ''}</span>
+          <Card key={c.country} style={{ padding: '20px' }}>
+            <div style={{ fontSize: 26, marginBottom: 10 }}>{FLAG[c.country] || '🍺'}</div>
+            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 6 }}>{c.country}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 11, color: 'var(--text3)' }}>{c.count} beers</span>
               <ScoreBadge score={c.avg} size="sm" />
             </div>
-            <div style={{ height: 3, background: 'var(--bg3)', borderRadius: 2 }}>
-              <div style={{ height: '100%', width: `${(c.count / max) * 100}%`, background: 'var(--amber)', borderRadius: 2 }} />
+            <div style={{ height: 2, background: 'var(--bg3)', borderRadius: 1 }}>
+              <div style={{ height: '100%', width: `${(c.count / max) * 100}%`, background: 'var(--text3)', borderRadius: 1 }} />
             </div>
           </Card>
         ))}
@@ -346,30 +303,29 @@ function BreweriesSection({ beers }) {
     labels: data.map(d => trunc(d.brewery, 18)),
     datasets: [{
       data: data.map(d => d.count),
-      backgroundColor: data.map((_, i) => i < 3 ? '#f59e0b44' : '#1c1c2888'),
-      borderColor: data.map((_, i) => i < 3 ? '#f59e0b' : '#ffffff22'),
+      backgroundColor: 'rgba(0,0,0,0.06)',
+      borderColor: 'rgba(0,0,0,0.18)',
       borderWidth: 1,
-      borderRadius: 4,
+      borderRadius: 3,
     }],
   }
 
   return (
     <section>
-      <SectionHead>Top Breweries</SectionHead>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <SectionHead>Breweries</SectionHead>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {data.slice(0, 8).map((b, i) => (
-            <div key={b.brewery} style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{
-                width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
-                background: i < 3 ? 'rgba(245,158,11,0.15)' : 'var(--bg3)',
-                border: `1px solid ${i < 3 ? '#f59e0b' : 'var(--border)'}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 11, fontWeight: 800, color: i < 3 ? 'var(--amber)' : 'var(--text3)',
-              }}>{i + 1}</div>
+            <div key={b.brewery} style={{
+              background: 'var(--bg2)', borderRadius: i === 0 ? '10px 10px 0 0' : i === Math.min(7, data.length - 1) ? '0 0 10px 10px' : 0,
+              border: '1px solid var(--border)',
+              marginTop: i > 0 ? -1 : 0,
+              padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 12,
+            }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: i < 3 ? 'var(--amber)' : 'var(--text3)', width: 18, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.brewery}</div>
-                <div style={{ fontSize: 11, color: 'var(--text3)' }}>{FLAG[b.country] || ''} {b.country} · {b.count} beers</div>
+                <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 1 }}>{FLAG[b.country] || ''} {b.country} · {b.count} beers</div>
               </div>
               <ScoreBadge score={b.avg} size="sm" />
             </div>
@@ -409,29 +365,29 @@ function StylesSection({ beers }) {
     labels: sorted.map(s => trunc(s.style, 18)),
     datasets: [{
       data: sorted.map(s => s.avg),
-      backgroundColor: sorted.map(s => scoreColor(s.avg) + '55'),
-      borderColor: sorted.map(s => scoreColor(s.avg)),
+      backgroundColor: sorted.map(s => scoreColor(s.avg) + '22'),
+      borderColor: sorted.map(s => scoreColor(s.avg) + 'aa'),
       borderWidth: 1,
-      borderRadius: 4,
+      borderRadius: 3,
     }],
   }
 
   return (
     <section>
-      <SectionHead>Beer Styles</SectionHead>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <SectionHead>Styles</SectionHead>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <Card>
           <CardLabel>Distribution</CardLabel>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
             {data.map((s, i) => (
-              <div key={s.style} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: PALETTE[i % PALETTE.length], flexShrink: 0 }} />
-                <div style={{ flex: 1, fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.style}</div>
-                <span style={{ fontSize: 11, color: 'var(--text3)', width: 32, textAlign: 'right' }}>{Math.round(s.count / total * 100)}%</span>
-                <div style={{ width: 60, height: 4, background: 'var(--bg3)', borderRadius: 2, flexShrink: 0 }}>
-                  <div style={{ height: '100%', width: `${(s.count / data[0].count) * 100}%`, background: PALETTE[i % PALETTE.length], borderRadius: 2 }} />
+              <div key={s.style} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 2, height: 14, background: 'var(--text3)', opacity: 1 - i * 0.07, flexShrink: 0, borderRadius: 1 }} />
+                <div style={{ flex: 1, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text)' }}>{s.style}</div>
+                <span style={{ fontSize: 11, color: 'var(--text3)', width: 28, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{Math.round(s.count / total * 100)}%</span>
+                <div style={{ width: 56, height: 2, background: 'var(--bg3)', borderRadius: 1, flexShrink: 0 }}>
+                  <div style={{ height: '100%', width: `${(s.count / data[0].count) * 100}%`, background: 'var(--text3)', borderRadius: 1 }} />
                 </div>
-                <span style={{ fontSize: 11, color: 'var(--text2)', width: 14, textAlign: 'right' }}>{s.count}</span>
+                <span style={{ fontSize: 11, color: 'var(--text2)', width: 14, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{s.count}</span>
               </div>
             ))}
           </div>
@@ -474,9 +430,9 @@ function RatersSection({ beers }) {
         return scores.length ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : null
       }),
       borderColor: RATER_COLORS[r],
-      backgroundColor: RATER_COLORS[r] + '18',
-      borderWidth: 2,
-      pointRadius: 3,
+      backgroundColor: RATER_COLORS[r] + '14',
+      borderWidth: 1.5,
+      pointRadius: 2.5,
       pointBackgroundColor: RATER_COLORS[r],
     }))
   }), [beers])
@@ -489,12 +445,12 @@ function RatersSection({ beers }) {
         min: 0, max: 100,
         grid: { color: gridColor },
         angleLines: { color: gridColor },
-        pointLabels: { color: '#8888a8', font: { size: 11 } },
+        pointLabels: { color: '#706f6a', font: { size: 10 } },
         ticks: { display: false },
       },
     },
     plugins: {
-      legend: { position: 'bottom', labels: { color: '#8888a8', boxWidth: 10, padding: 16, font: { size: 11 } } },
+      legend: { position: 'bottom', labels: { color: '#706f6a', boxWidth: 8, padding: 16, font: { size: 10 } } },
       tooltip: { ...tooltipStyle },
     },
   }
@@ -514,24 +470,23 @@ function RatersSection({ beers }) {
   return (
     <section>
       <SectionHead>The Raters</SectionHead>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
         {stats.map(s => (
-          <Card key={s.name}>
-            <div style={{ width: 34, height: 34, borderRadius: '50%', background: RATER_COLORS[s.name] + '22', border: `2px solid ${RATER_COLORS[s.name]}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: RATER_COLORS[s.name], marginBottom: 10 }}>{s.name[0]}</div>
-            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{s.name}</div>
-            <div style={{ fontSize: 30, fontWeight: 900, color: RATER_COLORS[s.name], letterSpacing: -1, lineHeight: 1 }}>{s.avg}</div>
-            <div style={{ fontSize: 10, color: 'var(--text3)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>avg score</div>
+          <Card key={s.name} style={{ padding: '22px 20px', borderLeft: `3px solid ${RATER_COLORS[s.name]}` }}>
+            <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 12, color: RATER_COLORS[s.name] }}>{s.name}</div>
+            <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--text)', letterSpacing: -2, lineHeight: 1, marginBottom: 4, fontVariantNumeric: 'tabular-nums' }}>{s.avg}</div>
+            <div style={{ fontSize: 9, color: 'var(--text3)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: 2 }}>avg score</div>
             {[['Rated', s.count], ['Min', s.min, 'var(--red)'], ['Max', s.max, 'var(--green)'], ['≥ 85', s.generous, 'var(--green)'], ['< 40', s.harsh, 'var(--red)']].map(([l, v, c]) => (
-              <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 4 }}>
+              <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 5, borderBottom: '1px solid var(--border)', paddingBottom: 5 }}>
                 <span style={{ color: 'var(--text3)' }}>{l}</span>
-                <span style={{ fontWeight: 600, color: c || 'var(--text2)' }}>{v}</span>
+                <span style={{ fontWeight: 600, color: c || 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{v}</span>
               </div>
             ))}
           </Card>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <Card>
           <CardLabel>Taste profile by style</CardLabel>
           <div style={{ height: 300 }}>
@@ -539,18 +494,18 @@ function RatersSection({ beers }) {
           </div>
         </Card>
         <Card>
-          <CardLabel>Taste agreement — lower = more alike</CardLabel>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginTop: 8 }}>
+          <CardLabel>Agreement — lower = more alike</CardLabel>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 8 }}>
             {agreement.map(a => (
               <div key={a.pair}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
                   <span style={{ fontSize: 13, fontWeight: 600 }}>{a.pair}</span>
-                  <span style={{ fontSize: 13, color: scoreColor(100 - a.avgDiff) }}>{a.avgDiff} pts apart</span>
+                  <span style={{ fontSize: 12, color: scoreColor(100 - a.avgDiff), fontVariantNumeric: 'tabular-nums' }}>{a.avgDiff} pts</span>
                 </div>
-                <div style={{ height: 5, background: 'var(--bg3)', borderRadius: 3 }}>
-                  <div style={{ height: '100%', width: `${Math.min(100, (a.avgDiff / 35) * 100)}%`, background: a.avgDiff < 12 ? 'var(--green)' : a.avgDiff < 20 ? 'var(--amber)' : 'var(--red)', borderRadius: 3 }} />
+                <div style={{ height: 2, background: 'var(--bg3)', borderRadius: 1 }}>
+                  <div style={{ height: '100%', width: `${Math.min(100, (a.avgDiff / 35) * 100)}%`, background: a.avgDiff < 12 ? 'var(--green)' : a.avgDiff < 20 ? 'var(--amber)' : 'var(--red)', borderRadius: 1 }} />
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 3 }}>{a.shared} beers in common</div>
+                <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 4 }}>{a.shared} beers in common</div>
               </div>
             ))}
           </div>
@@ -571,9 +526,9 @@ function AbvSection({ beers }) {
     datasets: [{
       label: 'Beers',
       data: pts,
-      backgroundColor: pts.map(p => scoreColor(p.y) + 'cc'),
-      pointRadius: 6,
-      pointHoverRadius: 8,
+      backgroundColor: pts.map(p => scoreColor(p.y) + 'bb'),
+      pointRadius: 5,
+      pointHoverRadius: 7,
     }],
   }
 
@@ -594,8 +549,8 @@ function AbvSection({ beers }) {
       },
     },
     scales: {
-      x: { title: { display: true, text: 'ABV %', color: '#55556a' }, grid: { color: gridColor }, ticks: { color: '#55556a' }, border: { color: 'transparent' } },
-      y: { title: { display: true, text: 'Score', color: '#55556a' }, min: 0, max: 100, grid: { color: gridColor }, ticks: { color: '#55556a' }, border: { color: 'transparent' } },
+      x: { title: { display: true, text: 'ABV %', color: '#b2b0a9', font: { size: 10 } }, grid: { color: gridColor }, ticks: { color: '#b2b0a9' }, border: { color: 'transparent' } },
+      y: { title: { display: true, text: 'Score', color: '#b2b0a9', font: { size: 10 } }, min: 0, max: 100, grid: { color: gridColor }, ticks: { color: '#b2b0a9' }, border: { color: 'transparent' } },
     },
   }
 
@@ -607,11 +562,11 @@ function AbvSection({ beers }) {
         <div style={{ height: 300 }}>
           <Scatter data={scatterData} options={scatterOpts} />
         </div>
-        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 12, flexWrap: 'wrap' }}>
-          {[['≥ 85', '#22c55e'], ['70–85', '#f59e0b'], ['50–70', '#f97316'], ['< 50', '#f87171']].map(([l, c]) => (
-            <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />
-              <span style={{ color: 'var(--text2)' }}>{l}</span>
+        <div style={{ display: 'flex', gap: 20, justifyContent: 'center', marginTop: 14, flexWrap: 'wrap' }}>
+          {[['≥ 85', '#2e7d52'], ['70–85', '#a96f10'], ['50–70', '#c45a20'], ['< 50', '#b83030']].map(([l, c]) => (
+            <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: c }} />
+              <span style={{ color: 'var(--text3)' }}>{l}</span>
             </div>
           ))}
         </div>
@@ -628,7 +583,7 @@ function BeerTable({ beers }) {
   const [style, setStyle] = useState('All')
 
   const countries = useMemo(() => ['All', ...new Set(beers.map(b => b.country).filter(Boolean).sort())], [beers])
-  const styles = useMemo(() => ['All', ...new Set(beers.map(b => b.style).filter(Boolean).sort())], [beers])
+  const styles    = useMemo(() => ['All', ...new Set(beers.map(b => b.style).filter(Boolean).sort())], [beers])
 
   const filtered = useMemo(() => {
     let list = [...beers]
@@ -643,31 +598,31 @@ function BeerTable({ beers }) {
     })
   }, [beers, search, sortBy, country, style])
 
-  const inputStyle = {
-    background: 'var(--bg2)', border: '1px solid rgba(255,255,255,0.12)',
-    borderRadius: 10, padding: '8px 14px', fontSize: 13, color: 'var(--text)',
+  const ctrl = {
+    background: 'var(--bg2)', border: '1px solid var(--border)',
+    borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--text)',
     outline: 'none', fontFamily: 'inherit',
   }
 
   return (
     <section>
       <SectionHead>All Beers</SectionHead>
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14, alignItems: 'center' }}>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" style={{ ...inputStyle, flex: 1, minWidth: 180 }} />
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14, alignItems: 'center' }}>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" style={{ ...ctrl, flex: 1, minWidth: 160 }} />
         {[
           ['sort', sortBy, setSortBy, [['avg','Top Rated'],['name','A–Z'],['abv','ABV'],['ratingCount','Most Rated']]],
           ['country', country, setCountry, countries.map(c => [c, c])],
           ['style', style, setStyle, styles.map(s => [s, s])],
         ].map(([, val, set, opts]) => (
-          <select key={String(opts[0])} value={val} onChange={e => set(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+          <select key={String(opts[0])} value={val} onChange={e => set(e.target.value)} style={{ ...ctrl, cursor: 'pointer' }}>
             {opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         ))}
-        <span style={{ fontSize: 12, color: 'var(--text3)' }}>{filtered.length} beers</span>
+        <span style={{ fontSize: 11, color: 'var(--text3)', fontVariantNumeric: 'tabular-nums' }}>{filtered.length}</span>
       </div>
 
-      <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 110px 72px 72px 72px 72px 68px 58px', padding: '9px 16px', borderBottom: '1px solid var(--border)', fontSize: 10, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: 0.6 }}>
+      <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 66px 66px 66px 66px 62px 52px', padding: '10px 18px', borderBottom: '1px solid var(--border)', fontSize: 9, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: 2 }}>
           <span>Beer</span><span style={{ textAlign: 'center' }}>Style</span>
           <span style={{ textAlign: 'center' }}>Hlynur</span><span style={{ textAlign: 'center' }}>Robert</span>
           <span style={{ textAlign: 'center' }}>Steinar</span><span style={{ textAlign: 'center' }}>Palli</span>
@@ -677,9 +632,11 @@ function BeerTable({ beers }) {
           <div
             key={b.id}
             style={{
-              display: 'grid', gridTemplateColumns: '1fr 110px 72px 72px 72px 72px 68px 58px',
-              padding: '11px 16px', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
-              alignItems: 'center', transition: 'background 0.1s',
+              display: 'grid', gridTemplateColumns: '1fr 100px 66px 66px 66px 66px 62px 52px',
+              padding: '12px 18px',
+              borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
+              alignItems: 'center',
+              transition: 'background 0.08s',
             }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
             onMouseLeave={e => e.currentTarget.style.background = ''}
@@ -688,12 +645,12 @@ function BeerTable({ beers }) {
               <div style={{ fontWeight: 600, fontSize: 13 }}>{b.name}</div>
               <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 1 }}>{FLAG[b.country] || ''} {b.brewery}</div>
             </div>
-            <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text2)' }}>{b.style || '–'}</div>
+            <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text3)' }}>{b.style || '—'}</div>
             {RATERS.map(r => (
               <div key={r} style={{ textAlign: 'center' }}><ScoreBadge score={b.ratings[r] ?? null} size="sm" /></div>
             ))}
             <div style={{ textAlign: 'center' }}><ScoreBadge score={b.avg} /></div>
-            <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text3)' }}>{b.abv != null ? `${b.abv}%` : '–'}</div>
+            <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text3)', fontVariantNumeric: 'tabular-nums' }}>{b.abv != null ? `${b.abv}%` : '—'}</div>
           </div>
         ))}
       </div>
@@ -722,23 +679,41 @@ export default function App() {
   const topBeer      = useMemo(() => [...scored].sort((a, b) => b.avg - a.avg)[0], [scored])
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 80px' }}>
-      <div style={{ paddingTop: 56, paddingBottom: 44, borderBottom: '1px solid var(--border)', marginBottom: 48 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--amber)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 10 }}>Café Tyrol</div>
-        <h1 style={{ fontSize: 'clamp(34px, 6vw, 68px)', fontWeight: 900, letterSpacing: -2, lineHeight: 1.05, marginBottom: 14 }}>
-          The Ultimate<br />Beer Wiki 🍺
-        </h1>
-        <p style={{ fontSize: 16, color: 'var(--text2)', maxWidth: 420, lineHeight: 1.65 }}>
-          {allBeers.length} beers rated by four friends. Ranked, charted, and exposed.
-        </p>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 28 }}>
-          <StatCard label="Beers" value={allBeers.length} />
-          <StatCard label="Total Ratings" value={totalRatings} />
-          <StatCard label="Avg Score" value={avgScore} />
-          <StatCard label="Top Beer" value={topBeer?.avg} sub={topBeer?.name} />
+    <div style={{ maxWidth: 1060, margin: '0 auto', padding: '0 28px 100px' }}>
+
+      {/* Hero */}
+      <div style={{ paddingTop: 72, paddingBottom: 56 }}>
+        <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: 4, marginBottom: 20 }}>
+          Café Tyrol
         </div>
+        <h1 style={{ fontSize: 'clamp(38px, 6vw, 72px)', fontWeight: 900, letterSpacing: -3, lineHeight: 0.95, color: 'var(--text)', marginBottom: 20 }}>
+          Beer Wiki
+        </h1>
+        <p style={{ fontSize: 14, color: 'var(--text3)', maxWidth: 320, lineHeight: 1.7, fontWeight: 400 }}>
+          {allBeers.length} beers. Four friends. Every opinion on record.
+        </p>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 52 }}>
+
+      <Divider />
+
+      {/* Stats row */}
+      <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap', marginBottom: 64 }}>
+        {[
+          ['Beers', allBeers.length, null],
+          ['Ratings', totalRatings, null],
+          ['Avg Score', avgScore, null],
+          ['Best Beer', topBeer?.avg?.toFixed(1), topBeer?.name],
+        ].map(([label, value, sub]) => (
+          <div key={label}>
+            <div style={{ fontSize: 42, fontWeight: 900, letterSpacing: -2, color: 'var(--text)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+            <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text3)', marginTop: 6, textTransform: 'uppercase', letterSpacing: 2 }}>{label}</div>
+            {sub && <div style={{ fontSize: 11, color: 'var(--text2)', marginTop: 3, maxWidth: 160 }}>{sub}</div>}
+          </div>
+        ))}
+      </div>
+
+      {/* Sections */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
         <AddBeerForm beers={allBeers} onAdd={addBeer} />
         <CountriesSection beers={allBeers} />
         <BreweriesSection beers={allBeers} />
