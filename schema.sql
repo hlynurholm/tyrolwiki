@@ -9,3 +9,14 @@ CREATE TABLE IF NOT EXISTS beers (
   avg REAL,
   rating_count INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS vinbudin_beers (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  brewery TEXT,
+  style TEXT,
+  abv REAL,
+  image_url TEXT,
+  product_url TEXT,
+  synced_at TEXT NOT NULL
+);
