@@ -175,10 +175,11 @@ function Divider() {
 }
 
 // ── ADD BEER FORM ─────────────────────────────────────────────────────────────
-function AddBeerForm({ beers, onAdd }) {
+function AddBeerForm({ beers, onAdd, onUpdate }) {
   const [open, setOpen] = useState(false)
-  const blank = { name: '', style: '', brewery: '', country: '', abv: '', Hlynur: '', Robert: '', Steinar: '', Palli: '' }
+  const blank = { name: '', style: '', brewery: '', country: '', abv: '', rater: '', rating: '' }
   const [form, setForm] = useState(blank)
+  const [matched, setMatched] = useState(null)
 
   const styleOpts   = useMemo(() => [...new Set(beers.map(b => b.style).filter(Boolean).sort())], [beers])
   const breweryOpts = useMemo(() => [...new Set(beers.map(b => b.brewery).filter(Boolean).sort())], [beers])
@@ -186,24 +187,52 @@ function AddBeerForm({ beers, onAdd }) {
 
   function set(k, v) { setForm(f => ({ ...f, [k]: v })) }
 
-  function handleSubmit(e) {
+  function handleNameChange(val) {
+    const beer = beers.find(b => b.name.toLowerCase() === val.toLowerCase())
+    if (beer) {
+      setMatched(beer)
+      setForm(f => ({
+        ...f,
+        name: beer.name,
+        style: beer.style || '',
+        brewery: beer.brewery || '',
+        country: beer.country || '',
+        abv: beer.abv != null ? String(beer.abv) : '',
+      }))
+    } else {
+      setMatched(null)
+      set('name', val)
+    }
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.name.trim()) return
-    const ratings = {}
-    RATERS.forEach(r => { if (form[r] !== '') ratings[r] = parseFloat(form[r]) })
-    const scores = Object.values(ratings)
-    const avg = scores.length ? +(scores.reduce((a, b) => a + b) / scores.length).toFixed(1) : null
-    onAdd({
-      id: Math.max(...beers.map(b => b.id), 0) + 1,
-      name: form.name.trim(),
-      style: form.style.trim() || null,
-      brewery: form.brewery.trim() || null,
-      country: form.country.trim() || null,
-      abv: form.abv ? parseFloat(form.abv) : null,
-      ratings, avg, ratingCount: scores.length,
-    })
+    const ratingVal = parseFloat(form.rating)
+
+    if (matched) {
+      await onUpdate(matched.id, form.rater, ratingVal)
+    } else {
+      const ratings = { [form.rater]: ratingVal }
+      await onAdd({
+        name: form.name.trim(),
+        style: form.style.trim(),
+        brewery: form.brewery.trim(),
+        country: form.country.trim(),
+        abv: parseFloat(form.abv),
+        ratings,
+        avg: ratingVal,
+        ratingCount: 1,
+      })
+    }
     setForm(blank)
+    setMatched(null)
     setOpen(false)
+  }
+
+  function handleClose() {
+    setOpen(false)
+    setForm(blank)
+    setMatched(null)
   }
 
   const inp = {
@@ -219,13 +248,14 @@ function AddBeerForm({ beers, onAdd }) {
     transition: 'border-color 0.15s',
   }
   const lbl = { fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, display: 'block', marginBottom: 6, fontWeight: 600 }
+  const selectedRaterColor = form.rater ? RATER_COLORS[form.rater] : null
 
   return (
     <section>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: open ? 20 : 0 }}>
         <SectionHead>Log a Beer</SectionHead>
         <button
-          onClick={() => setOpen(o => !o)}
+          onClick={() => open ? handleClose() : setOpen(true)}
           style={{
             background: open ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg, #ff9f0a, #ff6b00)',
             border: open ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,159,10,0.4)',
@@ -241,22 +271,47 @@ function AddBeerForm({ beers, onAdd }) {
       </div>
       {open && (
         <div style={{ ...GLASS, borderRadius: 20, padding: '24px', marginTop: -4 }}>
+          {matched && (
+            <div style={{
+              marginBottom: 16, padding: '10px 14px', borderRadius: 10,
+              background: 'rgba(255,159,10,0.08)', border: '1px solid rgba(255,159,10,0.25)',
+              fontSize: 12, color: 'rgba(255,159,10,0.9)',
+            }}>
+              This beer is already in the database — your rating will be added to the existing entry.
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 0.6fr', gap: 12, marginBottom: 16 }}>
+              <div>
+                <label style={lbl}>Beer Name</label>
+                <input
+                  list="dl-names" style={inp} value={form.name} required
+                  onChange={e => handleNameChange(e.target.value)}
+                  placeholder="e.g. Chimay Blue"
+                />
+              </div>
               {[
-                { key: 'name', label: 'Beer Name *', list: 'dl-names', ph: 'e.g. Chimay Blue', req: true },
                 { key: 'style', label: 'Style', list: 'dl-styles', ph: 'IPA, Lager…' },
                 { key: 'brewery', label: 'Brewery', list: 'dl-breweries', ph: '' },
                 { key: 'country', label: 'Country', list: 'dl-countries', ph: '' },
-              ].map(({ key, label, list, ph, req }) => (
+              ].map(({ key, label, list, ph }) => (
                 <div key={key}>
                   <label style={lbl}>{label}</label>
-                  <input list={list} style={inp} value={form[key]} onChange={e => set(key, e.target.value)} placeholder={ph} required={req} />
+                  <input
+                    list={list} style={{ ...inp, background: matched ? 'rgba(255,255,255,0.03)' : inp.background }}
+                    value={form[key]} onChange={e => set(key, e.target.value)}
+                    placeholder={ph} required
+                  />
                 </div>
               ))}
               <div>
                 <label style={lbl}>ABV %</label>
-                <input style={inp} type="number" step="0.1" min="0" max="20" value={form.abv} onChange={e => set('abv', e.target.value)} placeholder="5.0" />
+                <input
+                  style={{ ...inp, background: matched ? 'rgba(255,255,255,0.03)' : inp.background }}
+                  type="number" step="0.1" min="0" max="20"
+                  value={form.abv} onChange={e => set('abv', e.target.value)}
+                  placeholder="5.0" required
+                />
               </div>
             </div>
             <datalist id="dl-names">{beers.map(b => <option key={b.id} value={b.name} />)}</datalist>
@@ -264,17 +319,35 @@ function AddBeerForm({ beers, onAdd }) {
             <datalist id="dl-breweries">{breweryOpts.map(b => <option key={b} value={b} />)}</datalist>
             <datalist id="dl-countries">{countryOpts.map(c => <option key={c} value={c} />)}</datalist>
             <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '4px 0 16px' }} />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr) auto', gap: 12, alignItems: 'end' }}>
-              {RATERS.map(r => (
-                <div key={r}>
-                  <label style={{ ...lbl, color: RATER_COLORS[r] + 'bb' }}>{r}</label>
-                  <input
-                    style={{ ...inp, borderColor: RATER_COLORS[r] + '33', boxShadow: `0 0 0 0 ${RATER_COLORS[r]}` }}
-                    type="number" min="0" max="100" step="1"
-                    value={form[r]} onChange={e => set(r, e.target.value)} placeholder="0–100"
-                  />
-                </div>
-              ))}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 12, alignItems: 'end' }}>
+              <div>
+                <label style={lbl}>Who are you?</label>
+                <select
+                  value={form.rater} onChange={e => set('rater', e.target.value)} required
+                  style={{
+                    ...inp,
+                    cursor: 'pointer',
+                    borderColor: selectedRaterColor ? selectedRaterColor + '55' : 'rgba(255,255,255,0.1)',
+                    color: selectedRaterColor || 'rgba(255,255,255,0.9)',
+                  }}
+                >
+                  <option value="" disabled style={{ background: '#0e0e18' }}>Select…</option>
+                  {RATERS.map(r => (
+                    <option key={r} value={r} style={{ background: '#0e0e18', color: RATER_COLORS[r] }}>{r}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ ...lbl, color: selectedRaterColor ? selectedRaterColor + 'bb' : 'rgba(255,255,255,0.35)' }}>
+                  Your Rating
+                </label>
+                <input
+                  style={{ ...inp, borderColor: selectedRaterColor ? selectedRaterColor + '55' : 'rgba(255,255,255,0.1)' }}
+                  type="number" min="0" max="100" step="1"
+                  value={form.rating} onChange={e => set('rating', e.target.value)}
+                  placeholder="0–100" required
+                />
+              </div>
               <button type="submit" style={{
                 background: 'linear-gradient(135deg, #ff9f0a, #ff6b00)',
                 border: 'none', borderRadius: 10, padding: '10px 24px',
@@ -282,7 +355,7 @@ function AddBeerForm({ beers, onAdd }) {
                 boxShadow: '0 0 20px rgba(255,159,10,0.4), 0 4px 12px rgba(0,0,0,0.3)',
                 cursor: 'pointer', whiteSpace: 'nowrap', alignSelf: 'end',
               }}>
-                Add
+                {matched ? 'Add Rating' : 'Add Beer'}
               </button>
             </div>
           </form>
@@ -803,6 +876,17 @@ export default function App() {
     setAllBeers(prev => [...prev, { ...beer, id }])
   }
 
+  async function updateBeer(id, rater, rating) {
+    const res = await fetch(`/api/beers/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rater, rating }),
+    })
+    if (!res.ok) return
+    const { ratings, avg, ratingCount } = await res.json()
+    setAllBeers(prev => prev.map(b => b.id === id ? { ...b, ratings, avg, ratingCount } : b))
+  }
+
   const totalRatings = useMemo(() => allBeers.reduce((s, b) => s + b.ratingCount, 0), [allBeers])
   const scored       = useMemo(() => allBeers.filter(b => b.avg != null), [allBeers])
   const avgScore     = useMemo(() => scored.length ? +(scored.reduce((s, b) => s + b.avg, 0) / scored.length).toFixed(1) : 0, [scored])
@@ -870,7 +954,7 @@ export default function App() {
       <Divider />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
-        <AddBeerForm beers={allBeers} onAdd={addBeer} />
+        <AddBeerForm beers={allBeers} onAdd={addBeer} onUpdate={updateBeer} />
         <CountriesSection beers={allBeers} />
         <BreweriesSection beers={allBeers} />
         <StylesSection beers={allBeers} />
