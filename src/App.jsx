@@ -48,7 +48,7 @@ const STYLE_TO_RADAR = {
   'Quadrupel': 'Belgian', 'Abbey Ale': 'Belgian',
 }
 
-ChartJS.defaults.font = { family: 'Inter, system-ui, sans-serif', size: 11 }
+ChartJS.defaults.font = { family: 'Montserrat, system-ui, sans-serif', size: 11 }
 ChartJS.defaults.color = 'rgba(255,255,255,0.35)'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ function SectionHead({ children }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 22 }}>
       <div style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
-      <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 3, color: 'rgba(255,255,255,0.35)' }}>
+      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, color: 'rgba(255,255,255,0.35)' }}>
         {children}
       </span>
       <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, rgba(255,255,255,0.07), transparent)' }} />
@@ -155,7 +155,7 @@ function Card({ children, style }) {
 
 function CardLabel({ children }) {
   return (
-    <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 2.5, marginBottom: 16 }}>
+    <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 2.5, marginBottom: 16 }}>
       {children}
     </div>
   )
@@ -219,7 +219,7 @@ function AddBeerForm({ beers, onAdd }) {
     WebkitBackdropFilter: 'blur(20px)',
     transition: 'border-color 0.15s',
   }
-  const lbl = { fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 2, display: 'block', marginBottom: 6, fontWeight: 600 }
+  const lbl = { fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, display: 'block', marginBottom: 6, fontWeight: 600 }
 
   return (
     <section>
@@ -553,7 +553,7 @@ function RatersSection({ beers }) {
             }}>{s.name[0]}</div>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10, color: RATER_COLORS[s.name] }}>{s.name}</div>
             <div style={{ fontSize: 44, fontWeight: 900, letterSpacing: -2.5, lineHeight: 1, fontVariantNumeric: 'tabular-nums', color: '#ffffff' }}>{s.avg}</div>
-            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: 2 }}>avg score</div>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginBottom: 14, letterSpacing: 2 }}>avg score</div>
             {[['Rated', s.count, null], ['Min', s.min, '#ff375f'], ['Max', s.max, '#30d158'], ['≥ 85', s.generous, '#30d158'], ['< 40', s.harsh, '#ff375f']].map(([l, v, c]) => (
               <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 7, paddingTop: 7, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                 <span style={{ color: 'rgba(255,255,255,0.35)' }}>{l}</span>
@@ -713,7 +713,7 @@ function BeerTable({ beers }) {
           display: 'grid', gridTemplateColumns: '1fr 100px 52px 52px 52px 52px 52px 48px',
           padding: '11px 18px', borderBottom: '1px solid rgba(255,255,255,0.07)',
           fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.25)',
-          textTransform: 'uppercase', letterSpacing: 2,
+          letterSpacing: 2,
         }}>
           <span>Beer</span><span style={{ textAlign: 'center' }}>Style</span>
           <span style={{ textAlign: 'center' }}>H</span><span style={{ textAlign: 'center' }}>R</span>
@@ -814,7 +814,7 @@ export default function App() {
         ].map(([label, value, sub]) => (
           <div key={label} style={{ flex: 1, minWidth: 120, ...GLASS, borderRadius: 18, padding: '20px 22px' }}>
             <div style={{ fontSize: 40, fontWeight: 900, letterSpacing: -2, color: '#ffffff', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-            <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginTop: 7, textTransform: 'uppercase', letterSpacing: 2.5 }}>{label}</div>
+            <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', marginTop: 7, letterSpacing: 2.5 }}>{label}</div>
             {sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>{sub}</div>}
           </div>
         ))}
