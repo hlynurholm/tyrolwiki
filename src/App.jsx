@@ -397,6 +397,7 @@ function CountriesSection({ beers }) {
       .map(c => ({ ...c, avg: c.scores.length ? +(c.scores.reduce((a, b) => a + b) / c.scores.length).toFixed(1) : null }))
       .filter(c => c.count >= 2)
       .sort((a, b) => b.count - a.count)
+      .slice(0, 6)
   }, [beers])
   const max = data[0]?.count || 1
 
@@ -1055,8 +1056,8 @@ export default function App() {
         <Divider />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
-          <RatersSection beers={allBeers} />
           <AddBeerForm beers={allBeers} onAdd={addBeer} onUpdate={updateBeer} />
+          <RatersSection beers={allBeers} />
           <CountriesSection beers={allBeers} />
           <BreweriesSection beers={allBeers} />
           <StylesSection beers={allBeers} />
