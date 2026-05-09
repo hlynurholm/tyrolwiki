@@ -131,6 +131,18 @@ function hBarOpts(maxVal, dark) {
   }
 }
 
+// ── responsive hook ───────────────────────────────────────────────────────────
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < breakpoint)
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`)
+    const handler = e => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [breakpoint])
+  return isMobile
+}
+
 // ── tiny components ───────────────────────────────────────────────────────────
 function ScoreBadge({ score, size = 'md' }) {
   if (score == null) return <span style={{ color: 'var(--text-veryfaint)', fontSize: 12 }}>—</span>
@@ -383,6 +395,172 @@ function AddBeerForm({ beers, onAdd, onUpdate }) {
   )
 }
 
+// ── RATER PROFILE ─────────────────────────────────────────────────────────────
+function RaterProfile({ rater, beers, onClose }) {
+  const dark = useTheme()
+  const color = RATER_COLORS[rater]
+
+  const rated = useMemo(() =>
+    beers
+      .filter(b => b.ratings[rater] != null)
+      .map(b => ({ ...b, myScore: b.ratings[rater] }))
+      .sort((a, b) => b.myScore - a.myScore),
+    [beers, rater]
+  )
+
+  const tryNext = useMemo(() => {
+    const others = RATERS.filter(r => r !== rater)
+    return beers
+      .filter(b => b.ratings[rater] == null)
+      .map(b => {
+        const scores = others.map(r => b.ratings[r]).filter(v => v != null)
+        if (scores.length < 2) return null
+        const othersAvg = +(scores.reduce((a, c) => a + c, 0) / scores.length).toFixed(1)
+        return { ...b, othersAvg, otherScores: Object.fromEntries(others.map(r => [r, b.ratings[r] ?? null])) }
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.othersAvg - a.othersAvg)
+  }, [beers, rater])
+
+  const scores = rated.map(b => b.myScore)
+  const avg = scores.length ? +(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : null
+  const min = scores.length ? Math.min(...scores) : null
+  const max = scores.length ? Math.max(...scores) : null
+  const generous = scores.filter(s => s >= 85).length
+  const harsh = scores.filter(s => s < 40).length
+
+  // close on backdrop click
+  function handleBackdrop(e) { if (e.target === e.currentTarget) onClose() }
+
+  return (
+    <div
+      onClick={handleBackdrop}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 300,
+        background: dark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.4)',
+        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+        overflowY: 'auto',
+        display: 'flex', justifyContent: 'center',
+        padding: '24px 16px 60px',
+      }}
+    >
+      <div style={{ width: '100%', maxWidth: 680, display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+        {/* header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{
+            width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
+            background: `radial-gradient(circle at 40% 35%, ${color}cc, ${color}44)`,
+            border: `2px solid ${color}66`,
+            boxShadow: `0 0 24px ${color}55`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 20, fontWeight: 800, color: '#fff',
+          }}>{rater[0]}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 22, fontWeight: 900, color, letterSpacing: -0.5 }}>{rater}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>{rated.length} beers rated</div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--border-mid)',
+              background: 'var(--glass-bg)', backdropFilter: 'blur(20px)',
+              color: 'var(--text-dim)', fontSize: 16, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >✕</button>
+        </div>
+
+        {/* stats row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+          {[['Avg', avg, null], ['Min', min, '#ff375f'], ['Max', max, '#30d158'], ['≥ 85', generous, '#30d158'], ['< 40', harsh, '#ff375f']].map(([l, v, col]) => (
+            <div key={l} style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 14, padding: '14px 12px', textAlign: 'center' }}>
+              <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: -1, color: col || 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{v ?? '—'}</div>
+              <div style={{ fontSize: 9, color: 'var(--text-faint)', marginTop: 4, letterSpacing: 1.5, fontWeight: 700 }}>{l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* try next + all ratings side by side */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+
+          {/* try next */}
+          <div style={{ ...GLASS, borderRadius: 20, overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', maxHeight: 460 }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>TRY NEXT</span>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {tryNext.length === 0 ? (
+                <div style={{ padding: '20px', fontSize: 12, color: 'var(--text-faint)', textAlign: 'center' }}>No suggestions yet</div>
+              ) : tryNext.map((b, i) => (
+                <div key={b.id} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '11px 20px',
+                  borderBottom: i < tryNext.length - 1 ? '1px solid var(--border)' : 'none',
+                  transition: 'background 0.1s',
+                }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--row-hover)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <ScoreBadge score={b.othersAvg} size="sm" />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 1 }}>{b.brewery}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                    {RATERS.filter(r => r !== rater).map(r => b.otherScores[r] != null && (
+                      <div key={r} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                        <span style={{ fontSize: 8, fontWeight: 700, color: RATER_COLORS[r] }}>{r[0]}</span>
+                        <ScoreBadge score={b.otherScores[r]} size="sm" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* all ratings */}
+          <div style={{ ...GLASS, borderRadius: 20, overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', maxHeight: 460 }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>ALL RATINGS</span>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {rated.map((b, i) => (
+                <div key={b.id} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '11px 20px',
+                  borderBottom: i < rated.length - 1 ? '1px solid var(--border)' : 'none',
+                  transition: 'background 0.1s',
+                }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--row-hover)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <ScoreBadge score={b.myScore} size="sm" />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 1 }}>{b.brewery}{b.style ? ` · ${b.style}` : ''}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                    {RATERS.filter(r => r !== rater).map(r => b.ratings[r] != null && (
+                      <div key={r} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                        <span style={{ fontSize: 8, fontWeight: 700, color: RATER_COLORS[r] }}>{r[0]}</span>
+                        <ScoreBadge score={b.ratings[r]} size="sm" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
 // ── COUNTRIES ─────────────────────────────────────────────────────────────────
 function CountriesSection({ beers }) {
   const data = useMemo(() => {
@@ -426,6 +604,7 @@ function CountriesSection({ beers }) {
 // ── BREWERIES ─────────────────────────────────────────────────────────────────
 function BreweriesSection({ beers }) {
   const dark = useTheme()
+  const isMobile = useIsMobile()
   const data = useMemo(() => {
     const m = {}
     beers.forEach(b => {
@@ -455,7 +634,7 @@ function BreweriesSection({ beers }) {
   return (
     <section>
       <SectionHead>Breweries</SectionHead>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
         <div style={{ ...GLASS, borderRadius: 20, overflow: 'hidden', padding: 0 }}>
           {data.slice(0, 8).map((b, i) => (
             <div
@@ -504,6 +683,7 @@ function BreweriesSection({ beers }) {
 // ── STYLES ────────────────────────────────────────────────────────────────────
 function StylesSection({ beers }) {
   const dark = useTheme()
+  const isMobile = useIsMobile()
   const data = useMemo(() => {
     const m = {}
     beers.forEach(b => {
@@ -535,7 +715,7 @@ function StylesSection({ beers }) {
   return (
     <section>
       <SectionHead>Styles</SectionHead>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
         <Card>
           <CardLabel>Distribution</CardLabel>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
@@ -566,7 +746,9 @@ function StylesSection({ beers }) {
 // ── RATERS ────────────────────────────────────────────────────────────────────
 function RatersSection({ beers }) {
   const dark = useTheme()
+  const isMobile = useIsMobile()
   const [hoveredRater, setHoveredRater] = useState(null)
+  const [selectedRater, setSelectedRater] = useState(null)
 
   const stats = useMemo(() => RATERS.map(r => {
     const scores = beers.map(b => b.ratings[r]).filter(v => v != null)
@@ -634,15 +816,23 @@ function RatersSection({ beers }) {
 
   return (
     <section>
+      {selectedRater && (
+        <RaterProfile rater={selectedRater} beers={beers} onClose={() => setSelectedRater(null)} />
+      )}
       <SectionHead>The Raters</SectionHead>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12, marginBottom: 14 }}>
         {stats.map(s => (
-          <div key={s.name} style={{
+          <div key={s.name} onClick={() => setSelectedRater(s.name)} style={{
             ...GLASS,
             borderRadius: 20,
             padding: '20px 18px',
             border: `1px solid ${RATER_COLORS[s.name]}22`,
-          }}>
+            cursor: 'pointer',
+            transition: 'transform 0.15s, box-shadow 0.15s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 28px ${RATER_COLORS[s.name]}22` }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '' }}
+          >
             <div style={{
               width: 36, height: 36, borderRadius: '50%',
               background: `radial-gradient(circle at 40% 35%, ${RATER_COLORS[s.name]}cc, ${RATER_COLORS[s.name]}44)`,
@@ -665,7 +855,7 @@ function RatersSection({ beers }) {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
         <div style={{ ...GLASS_DARK, borderRadius: 20, overflow: 'hidden', padding: 0 }}>
           <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
             <CardLabel>Taste Profile by Style</CardLabel>
@@ -794,12 +984,35 @@ const COLUMNS = [
   { key: 'abv',     label: 'ABV',   align: 'center' },
 ]
 
-function BeerTable({ beers }) {
+function BeerTable({ beers, onUpdate }) {
+  const isMobile = useIsMobile()
   const [search, setSearch]   = useState('')
   const [sortBy, setSortBy]   = useState('avg')
   const [sortDir, setSortDir] = useState('desc')
   const [country, setCountry] = useState('All')
   const [style, setStyle]     = useState('All')
+  const [editing, setEditing] = useState(null) // { beerId, rater }
+  const [editVal, setEditVal] = useState('')
+
+  function startEdit(beerId, rater, current) {
+    setEditing({ beerId, rater })
+    setEditVal(current != null ? String(current) : '')
+  }
+
+  async function commitEdit() {
+    if (!editing) return
+    const val = parseFloat(editVal)
+    if (!isNaN(val) && val >= 0 && val <= 100) {
+      await onUpdate(editing.beerId, editing.rater, Math.round(val))
+    }
+    setEditing(null)
+    setEditVal('')
+  }
+
+  function cancelEdit() {
+    setEditing(null)
+    setEditVal('')
+  }
 
   const countries = useMemo(() => ['All', ...new Set(beers.map(b => b.country).filter(Boolean).sort())], [beers])
   const styles    = useMemo(() => ['All', ...new Set(beers.map(b => b.style).filter(Boolean).sort())], [beers])
@@ -871,71 +1084,335 @@ function BeerTable({ beers }) {
         <span style={{ fontSize: 11, color: 'var(--text-faint)', fontVariantNumeric: 'tabular-nums' }}>{filtered.length}</span>
       </div>
 
-      <div style={{ ...GLASS, borderRadius: 20, overflow: 'hidden', padding: 0 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: colTemplate, padding: '11px 18px', borderBottom: '1px solid var(--border)' }}>
-          {COLUMNS.map(col => {
-            const active = sortBy === col.key
-            return (
-              <div
-                key={col.key}
-                onClick={() => handleSort(col.key)}
-                style={{
-                  textAlign: col.align,
-                  fontSize: 9, fontWeight: 700, letterSpacing: 2,
-                  color: active ? 'var(--text-mid)' : 'var(--text-faint)',
-                  cursor: 'pointer', userSelect: 'none',
-                  display: 'flex', alignItems: 'center',
-                  justifyContent: col.align === 'center' ? 'center' : 'flex-start',
-                  gap: 4, transition: 'color 0.15s',
-                }}
-              >
-                {col.label}
-                {active && <span style={{ fontSize: 8, opacity: 0.7 }}>{sortDir === 'desc' ? '▼' : '▲'}</span>}
+      {isMobile ? (
+        /* ── MOBILE: card list ── */
+        <>
+          {/* sort controls */}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+            {[['avg', 'Avg'], ['name', 'Name'], ['abv', 'ABV'], ...RATERS.map(r => [r, r])].map(([key, label]) => {
+              const active = sortBy === key
+              return (
+                <button key={key} onClick={() => handleSort(key)} style={{
+                  padding: '5px 12px', borderRadius: 20, fontSize: 10, fontWeight: 700,
+                  cursor: 'pointer', letterSpacing: 0.3, border: 'none',
+                  background: active ? 'var(--text-mid)' : 'var(--input-bg)',
+                  color: active ? 'var(--bg)' : 'var(--text-dim)',
+                  border: active ? 'none' : '1px solid var(--border-mid)',
+                }}>
+                  {label}{active ? (sortDir === 'desc' ? ' ▼' : ' ▲') : ''}
+                </button>
+              )
+            })}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filtered.map(b => (
+            <div key={b.id} style={{ ...GLASS, borderRadius: 16, padding: '14px 16px' }}>
+              {/* name + meta */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 10 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.3 }}>{b.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>{FLAG[b.country] || ''} {b.brewery}</div>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 5, flexWrap: 'wrap' }}>
+                    {b.style && (
+                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.8, padding: '2px 8px', borderRadius: 20, background: 'var(--input-bg)', color: 'var(--text-dim)', border: '1px solid var(--border)' }}>
+                        {b.style}
+                      </span>
+                    )}
+                    {b.abv != null && (
+                      <span style={{ fontSize: 9, color: 'var(--text-faint)', fontVariantNumeric: 'tabular-nums', padding: '2px 0' }}>
+                        {b.abv}%
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <ScoreBadge score={b.avg} size="md" />
               </div>
-            )
-          })}
+
+              {/* ratings row */}
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
+                {RATERS.map(r => {
+                  const isEditing = editing?.beerId === b.id && editing?.rater === r
+                  return (
+                    <div key={r} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontSize: 8, fontWeight: 700, color: RATER_COLORS[r], letterSpacing: 0.5 }}>{r.slice(0, 3).toUpperCase()}</span>
+                      {isEditing ? (
+                        <input
+                          autoFocus
+                          type="number" min="0" max="100"
+                          value={editVal}
+                          onChange={e => setEditVal(e.target.value)}
+                          onBlur={commitEdit}
+                          onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') cancelEdit() }}
+                          style={{
+                            width: 38, height: 38, borderRadius: '50%',
+                            border: '1.5px solid #ff9f0a',
+                            background: 'var(--input-bg)',
+                            color: 'var(--text)', fontFamily: 'inherit',
+                            fontSize: 12, fontWeight: 800, textAlign: 'center',
+                            outline: 'none', padding: 0,
+                            MozAppearance: 'textfield',
+                          }}
+                        />
+                      ) : (
+                        <div
+                          onClick={() => startEdit(b.id, r, b.ratings[r] ?? null)}
+                          style={{ cursor: 'pointer', borderRadius: '50%', transition: 'opacity 0.15s' }}
+                          onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                        >
+                          <ScoreBadge score={b.ratings[r] ?? null} size="sm" />
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+          </div>
+        </>
+      ) : (
+        /* ── DESKTOP: grid table ── */
+        <div style={{ ...GLASS, borderRadius: 20, overflow: 'hidden', padding: 0 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: colTemplate, padding: '11px 18px', borderBottom: '1px solid var(--border)' }}>
+            {COLUMNS.map(col => {
+              const active = sortBy === col.key
+              return (
+                <div
+                  key={col.key}
+                  onClick={() => handleSort(col.key)}
+                  style={{
+                    textAlign: col.align,
+                    fontSize: 9, fontWeight: 700, letterSpacing: 2,
+                    color: active ? 'var(--text-mid)' : 'var(--text-faint)',
+                    cursor: 'pointer', userSelect: 'none',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: col.align === 'center' ? 'center' : 'flex-start',
+                    gap: 4, transition: 'color 0.15s',
+                  }}
+                >
+                  {col.label}
+                  {active && <span style={{ fontSize: 8, opacity: 0.7 }}>{sortDir === 'desc' ? '▼' : '▲'}</span>}
+                </div>
+              )
+            })}
+          </div>
+          {filtered.map((b, i) => (
+            <div
+              key={b.id}
+              style={{
+                display: 'grid', gridTemplateColumns: colTemplate,
+                padding: '11px 18px',
+                borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
+                alignItems: 'center', transition: 'background 0.1s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--row-hover)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 13 }}>{b.name}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>{FLAG[b.country] || ''} {b.brewery}</div>
+              </div>
+              <div style={{ textAlign: 'center', fontSize: 10, color: 'var(--text-dim)' }}>{b.style || '—'}</div>
+              {RATERS.map(r => {
+                const isEditing = editing?.beerId === b.id && editing?.rater === r
+                return (
+                  <div key={r} style={{ display: 'flex', justifyContent: 'center' }}>
+                    {isEditing ? (
+                      <input
+                        autoFocus
+                        type="number" min="0" max="100"
+                        value={editVal}
+                        onChange={e => setEditVal(e.target.value)}
+                        onBlur={commitEdit}
+                        onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') cancelEdit() }}
+                        style={{
+                          width: 34, height: 34, borderRadius: '50%',
+                          border: '1.5px solid #ff9f0a',
+                          background: 'var(--input-bg)',
+                          color: 'var(--text)', fontFamily: 'inherit',
+                          fontSize: 11, fontWeight: 800, textAlign: 'center',
+                          outline: 'none', padding: 0,
+                          MozAppearance: 'textfield',
+                        }}
+                      />
+                    ) : (
+                      <div
+                        onClick={() => startEdit(b.id, r, b.ratings[r] ?? null)}
+                        title={`Edit ${r}'s rating`}
+                        style={{ cursor: 'pointer', borderRadius: '50%', transition: 'opacity 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                      >
+                        <ScoreBadge score={b.ratings[r] ?? null} size="sm" />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <ScoreBadge score={b.avg} size="sm" />
+              </div>
+              <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-faint)', fontVariantNumeric: 'tabular-nums' }}>
+                {b.abv != null ? `${b.abv}%` : '—'}
+              </div>
+            </div>
+          ))}
         </div>
-        {filtered.map((b, i) => (
-          <div
-            key={b.id}
+      )}
+    </section>
+  )
+}
+
+// ── RECOMMENDATIONS ───────────────────────────────────────────────────────────
+function RecommendationsSection({ recommendations, syncedAt, total, onSync, syncing }) {
+  const dark = useTheme()
+  function relevanceColor(r) {
+    if (r >= 80) return '#30d158'
+    if (r >= 65) return '#ffd60a'
+    if (r >= 50) return '#ff9f0a'
+    return '#8e8e93'
+  }
+
+  const syncLabel = syncedAt
+    ? `Synced ${new Date(syncedAt).toLocaleDateString('is-IS', { day: 'numeric', month: 'short', year: 'numeric' })}`
+    : 'Never synced'
+
+  return (
+    <section>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+        <SectionHead>Recommendations</SectionHead>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {syncedAt && (
+            <span style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: 1 }}>{syncLabel}</span>
+          )}
+          <button
+            onClick={onSync}
+            disabled={syncing}
             style={{
-              display: 'grid', gridTemplateColumns: colTemplate,
-              padding: '11px 18px',
-              borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
-              alignItems: 'center', transition: 'background 0.1s',
+              background: syncing ? 'var(--input-bg)' : 'linear-gradient(135deg, #0a84ff, #005ec4)',
+              border: '1px solid rgba(10,132,255,0.35)',
+              borderRadius: 20, padding: '7px 16px',
+              fontSize: 11, fontWeight: 600, letterSpacing: 0.5,
+              color: syncing ? 'var(--text-faint)' : '#ffffff',
+              cursor: syncing ? 'default' : 'pointer',
+              boxShadow: syncing ? 'none' : '0 0 16px rgba(10,132,255,0.25)',
+              transition: 'all 0.2s',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'var(--row-hover)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 13 }}>{b.name}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>{FLAG[b.country] || ''} {b.brewery}</div>
-            </div>
-            <div style={{ textAlign: 'center', fontSize: 10, color: 'var(--text-dim)' }}>{b.style || '—'}</div>
-            {RATERS.map(r => (
-              <div key={r} style={{ display: 'flex', justifyContent: 'center' }}>
-                <ScoreBadge score={b.ratings[r] ?? null} size="sm" />
-              </div>
+            {syncing ? 'Syncing…' : '↻ Sync Vínbúðin'}
+          </button>
+        </div>
+      </div>
+
+      <p style={{ fontSize: 12, color: 'var(--text-faint)', margin: '0 0 18px', lineHeight: 1.6 }}>
+        Beers available at Vínbúðin that we haven't tried yet, ranked by how well their style matches our ratings. Click any card to open it on Vínbúðin.
+      </p>
+
+      {recommendations.length === 0 && !syncing && (
+        <Card>
+          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-faint)', fontSize: 13 }}>
+            {total === 0
+              ? 'No Vínbúðin data yet — click "Sync Vínbúðin" to fetch beers.'
+              : 'All Vínbúðin beers have been tried!'}
+          </div>
+        </Card>
+      )}
+
+      {recommendations.length > 0 && (
+        <>
+          {/* horizontal scroll row — top 50 */}
+          <div style={{ overflowX: 'auto', margin: '0 -8px', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+            <div style={{
+              display: 'flex', gap: 14,
+              padding: '8px 8px 16px',
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch',
+            }}>
+            {recommendations.slice(0, 50).map(rec => (
+              <a
+                key={rec.id}
+                href={rec.product_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  ...GLASS, borderRadius: 16, overflow: 'hidden',
+                  display: 'flex', flexDirection: 'column',
+                  flexShrink: 0, width: 180,
+                  scrollSnapAlign: 'start',
+                  textDecoration: 'none', color: 'inherit',
+                  transition: 'transform 0.15s, box-shadow 0.15s',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = dark ? '0 10px 36px rgba(0,0,0,0.55)' : '0 8px 28px rgba(0,0,0,0.14)' }}
+                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '' }}
+              >
+                {/* image */}
+                <div style={{ height: 150, background: '#ffffff', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img
+                    src={rec.image_url}
+                    alt={rec.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 14 }}
+                    onError={e => { e.currentTarget.replaceWith(Object.assign(document.createElement('div'), { textContent: '🍺', style: 'font-size:36px;display:flex;align-items:center;justify-content:center;width:100%;height:100%' })) }}
+                  />
+                </div>
+
+                {/* info */}
+                <div style={{ padding: '12px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <div style={{ fontWeight: 700, fontSize: 12, lineHeight: 1.35, color: 'var(--text)' }}>{rec.name}</div>
+                  {rec.brewery && <div style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 1 }}>{rec.brewery}</div>}
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, flexWrap: 'wrap' }}>
+                    {rec.style && (
+                      <span style={{
+                        fontSize: 8, fontWeight: 700, letterSpacing: 0.8, padding: '2px 7px',
+                        borderRadius: 20, background: 'var(--input-bg)', color: 'var(--text-dim)',
+                        border: '1px solid var(--border)',
+                      }}>
+                        {rec.style}
+                      </span>
+                    )}
+                    {rec.abv != null && (
+                      <span style={{ fontSize: 9, color: 'var(--text-faint)', fontVariantNumeric: 'tabular-nums' }}>
+                        {rec.abv}%
+                      </span>
+                    )}
+                  </div>
+
+                  {/* relevance bar */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 8 }}>
+                    <div style={{ flex: 1, height: 2, borderRadius: 1, background: 'var(--border-mid)', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%', width: `${rec.relevance}%`,
+                        background: relevanceColor(rec.relevance),
+                        borderRadius: 1,
+                        boxShadow: `0 0 4px ${relevanceColor(rec.relevance)}`,
+                      }} />
+                    </div>
+                    <span style={{ fontSize: 8, color: relevanceColor(rec.relevance), fontWeight: 700, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                      {rec.relevance.toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+              </a>
             ))}
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <ScoreBadge score={b.avg} size="sm" />
-            </div>
-            <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-faint)', fontVariantNumeric: 'tabular-nums' }}>
-              {b.abv != null ? `${b.abv}%` : '—'}
             </div>
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </section>
   )
 }
 
 // ── APP ───────────────────────────────────────────────────────────────────────
 export default function App() {
+  const isMobile = useIsMobile()
   const [dark, setDark]       = useState(false)
   const [allBeers, setAllBeers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(null)
+  const [recs, setRecs] = useState({ recommendations: [], syncedAt: null, total: 0 })
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
     document.documentElement.toggleAttribute('data-dark', dark)
@@ -947,7 +1424,23 @@ export default function App() {
       .then(r => { if (!r.ok) throw new Error(r.statusText); return r.json() })
       .then(data => { setAllBeers(data); setLoading(false) })
       .catch(err => { setError(err.message); setLoading(false) })
+    fetch('/api/recommendations')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setRecs(data) })
+      .catch(() => {})
   }, [])
+
+  async function syncVinbudin() {
+    setSyncing(true)
+    try {
+      const res = await fetch('/api/vinbudin/sync', { method: 'POST' })
+      if (!res.ok) throw new Error('Sync failed')
+      const fresh = await fetch('/api/recommendations')
+      if (fresh.ok) setRecs(await fresh.json())
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   async function addBeer(beer) {
     const res = await fetch('/api/beers', {
@@ -990,14 +1483,14 @@ export default function App() {
 
   return (
     <ThemeCtx.Provider value={dark}>
-      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '0 28px 100px', position: 'relative' }}>
+      <div style={{ maxWidth: 1080, margin: '0 auto', padding: isMobile ? '0 16px 80px' : '0 28px 100px', position: 'relative' }}>
 
         {/* ── DARK MODE TOGGLE ── */}
         <button
           onClick={() => setDark(d => !d)}
           title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
           style={{
-            position: 'fixed', top: 24, right: 28, zIndex: 100,
+            position: 'fixed', top: 16, right: isMobile ? 16 : 28, zIndex: 100,
             width: 40, height: 40, borderRadius: '50%',
             background: 'var(--glass-bg)',
             border: '1px solid var(--border-mid)',
@@ -1013,7 +1506,7 @@ export default function App() {
         </button>
 
         {/* ── HERO ── */}
-        <div style={{ paddingTop: 72, paddingBottom: 56 }}>
+        <div style={{ paddingTop: isMobile ? 48 : 72, paddingBottom: isMobile ? 36 : 56 }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: 'rgba(255,159,10,0.10)',
@@ -1038,31 +1531,38 @@ export default function App() {
         </div>
 
         {/* ── STATS ── */}
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 72 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12, marginBottom: isMobile ? 48 : 72 }}>
           {[
             ['Beers', allBeers.length, null],
             ['Ratings', totalRatings, null],
             ['Avg Score', avgScore, null],
             ['Top Beer', topBeer?.avg?.toFixed(1), topBeer?.name],
           ].map(([label, value, sub]) => (
-            <div key={label} style={{ flex: 1, minWidth: 120, ...GLASS, borderRadius: 18, padding: '20px 22px' }}>
-              <div style={{ fontSize: 40, fontWeight: 900, letterSpacing: -2, color: 'var(--text)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+            <div key={label} style={{ ...GLASS, borderRadius: 18, padding: isMobile ? '16px 16px' : '20px 22px' }}>
+              <div style={{ fontSize: isMobile ? 32 : 40, fontWeight: 900, letterSpacing: -2, color: 'var(--text)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
               <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-faint)', marginTop: 7, letterSpacing: 2.5 }}>{label}</div>
-              {sub && <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4 }}>{sub}</div>}
+              {sub && <div style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 4 }}>{trunc(sub, 20)}</div>}
             </div>
           ))}
         </div>
 
         <Divider />
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 48 : 64 }}>
           <AddBeerForm beers={allBeers} onAdd={addBeer} onUpdate={updateBeer} />
           <RatersSection beers={allBeers} />
+          <RecommendationsSection
+            recommendations={recs.recommendations}
+            syncedAt={recs.syncedAt}
+            total={recs.total}
+            onSync={syncVinbudin}
+            syncing={syncing}
+          />
           <CountriesSection beers={allBeers} />
           <BreweriesSection beers={allBeers} />
           <StylesSection beers={allBeers} />
           <AbvSection beers={allBeers} />
-          <BeerTable beers={allBeers} />
+          <BeerTable beers={allBeers} onUpdate={updateBeer} />
         </div>
       </div>
     </ThemeCtx.Provider>
