@@ -1,33 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap');
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:      #f4f3ef;
-  --bg2:     #ffffff;
-  --bg3:     #eceae4;
-  --border:  rgba(0,0,0,0.07);
-  --border2: rgba(0,0,0,0.12);
-  --text:    #1a1917;
-  --text2:   #706f6a;
-  --text3:   #b2b0a9;
-  --amber:   #a96f10;
-  --green:   #2e7d52;
-  --blue:    #2056a0;
-  --red:     #b83030;
-  --font:    'Inter', system-ui, sans-serif;
+  --wood:       #180c06;
+  --wood2:      #241208;
+  --wood3:      #321a0c;
+  --brass:      #d4a820;
+  --brass-light:#f0d870;
+  --brass-dark: #8b6010;
+  --parchment:  #f4e4c0;
+  --parchment2: #ead8a4;
+  --ink:        #1e0e06;
+  --ink2:       #5a3818;
+  --ink3:       #9a7040;
+  --amber:      #d4a820;
+  --green:      #2a6a3a;
+  --red:        #7a1818;
+  --font:       'Inter', system-ui, sans-serif;
+  --serif:      'Playfair Display', Georgia, serif;
 }
 
 html, body, #root { min-height: 100%; }
 
 body {
   font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
+  background-color: #180c06;
+  background-image:
+    repeating-linear-gradient(87deg,  transparent 0px, transparent 4px,  rgba(0,0,0,0.07) 4px,  rgba(0,0,0,0.07) 5px),
+    repeating-linear-gradient(89deg,  transparent 0px, transparent 12px, rgba(255,180,60,0.018) 12px, rgba(255,180,60,0.018) 13px),
+    repeating-linear-gradient(91deg,  transparent 0px, transparent 28px, rgba(0,0,0,0.09) 28px, rgba(0,0,0,0.09) 29px),
+    repeating-linear-gradient(88deg,  transparent 0px, transparent 55px, rgba(255,160,40,0.012) 55px, rgba(255,160,40,0.012) 57px),
+    linear-gradient(170deg, #1e1008 0%, #180c06 25%, #221006 50%, #1a0c06 75%, #1e0e06 100%);
+  color: var(--parchment);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
 button { font-family: var(--font); cursor: pointer; border: none; background: none; color: inherit; }
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, #180c06, #241208, #180c06);
+  border-left: 1px solid rgba(212,168,32,0.1);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #d4a820, #8b6010, #d4a820);
+  border-radius: 2px;
+  border: 1px solid rgba(0,0,0,0.4);
+}
+
+::selection { background: rgba(212,168,32,0.3); color: #f4e4c0; }
