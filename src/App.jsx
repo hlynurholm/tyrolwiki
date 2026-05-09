@@ -401,12 +401,14 @@ function RaterProfile({ rater, beers, onClose }) {
   const isMobile = useIsMobile()
   const color = RATER_COLORS[rater]
   const [vinRecs, setVinRecs] = useState([])
+  const [vinLoading, setVinLoading] = useState(true)
 
   useEffect(() => {
     fetch(`/api/recommendations?rater=${encodeURIComponent(rater)}`)
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.recommendations) setVinRecs(d.recommendations.slice(0, 30)) })
       .catch(() => {})
+      .finally(() => setVinLoading(false))
   }, [rater])
 
   const rated = useMemo(() =>
@@ -490,13 +492,17 @@ function RaterProfile({ rater, beers, onClose }) {
           ))}
         </div>
 
-        {/* vínbúðin picks */}
-        {vinRecs.length > 0 && (
-          <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0 }}>
-            <div style={{ padding: isMobile ? '12px 16px' : '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>FROM VÍNBÚÐIN</span>
-              <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>— picked for your taste</span>
-            </div>
+        {/* vínbúðin picks — always rendered so it's visible even when empty */}
+        <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0 }}>
+          <div style={{ padding: isMobile ? '12px 16px' : '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>FROM VÍNBÚÐIN</span>
+            <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>— picked for your taste</span>
+          </div>
+          {vinLoading ? (
+            <div style={{ padding: '20px', fontSize: 12, color: 'var(--text-faint)', textAlign: 'center' }}>Loading…</div>
+          ) : vinRecs.length === 0 ? (
+            <div style={{ padding: '20px', fontSize: 12, color: 'var(--text-faint)', textAlign: 'center' }}>No data — sync Vínbúðin from the main page first</div>
+          ) : (
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', touchAction: 'pan-x', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
               <div style={{ display: 'flex', gap: 12, padding: '14px 16px', width: 'max-content' }}>
                 {vinRecs.map(rec => {
@@ -540,8 +546,8 @@ function RaterProfile({ rater, beers, onClose }) {
                 })}
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* try next + all ratings side by side on desktop, stacked on mobile */}
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
