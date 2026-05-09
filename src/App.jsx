@@ -31,15 +31,62 @@ const PALETTE = ['#f59e0b','#60a5fa','#a78bfa','#34d399','#f97316','#f43f5e','#0
 
 const RADAR_CATEGORIES = ['Lager', 'Pale Ale', 'IPA', 'Amber Ale', 'Wheat Beer', 'Belgian']
 const STYLE_TO_RADAR = {
-  'Lager': 'Lager', 'Light Lager': 'Lager', 'Pilsner': 'Lager',
-  'Rice Lager': 'Lager', 'European Dark Lager': 'Lager', 'Zwickel': 'Lager',
-  'Pale Ale': 'Pale Ale', 'APA': 'Pale Ale', 'Golden Ale': 'Pale Ale',
-  'IPA': 'IPA', 'Session IPA': 'IPA', 'NEIPA': 'IPA',
-  'Double IPA': 'IPA', 'NEDIPA': 'IPA', 'Milkshake IPA': 'IPA',
-  'Sumar session IPA': 'IPA',
-  'Amber Ale': 'Amber Ale',
-  'Wheat Beer': 'Wheat Beer', 'Hveitibjór': 'Wheat Beer',
-  'Belgian Ale': 'Belgian', 'Blonde': 'Belgian', 'Trappist': 'Belgian', 'Belgian IPA': 'Belgian',
+  // Lager family
+  'Lager':                 'Lager',
+  'Light Lager':           'Lager',
+  'Pilsner':               'Lager',
+  'Rice Lager':            'Lager',
+  'European Dark Lager':   'Lager',
+  'Zwickel':               'Lager',
+  'Märzen':                'Lager',
+  'Bock':                  'Lager',
+  'Dunkel':                'Lager',
+
+  // Pale Ale / general ale family
+  'Pale Ale':              'Pale Ale',
+  'APA':                   'Pale Ale',
+  'Golden Ale':            'Pale Ale',
+  'Ale':                   'Pale Ale',
+  'Kveik':                 'Pale Ale',
+  'Nordic Saison':         'Pale Ale',
+  'Saison':                'Pale Ale',
+  'Barleywine Style Ale':  'Pale Ale',
+  'Farmhouse Ale':         'Pale Ale',
+
+  // IPA family
+  'IPA':                   'IPA',
+  'Session IPA':           'IPA',
+  'NEIPA':                 'IPA',
+  'Double IPA':            'IPA',
+  'NEDIPA':                'IPA',
+  'Milkshake IPA':         'IPA',
+  'Sumar session IPA':     'IPA',
+  'Belgian IPA':           'IPA',
+  'Black IPA':             'IPA',
+  'Brut IPA':              'IPA',
+
+  // Amber Ale family
+  'Amber Ale':             'Amber Ale',
+  'Red Ale':               'Amber Ale',
+  'Irish Red Ale':         'Amber Ale',
+
+  // Wheat Beer family
+  'Wheat Beer':            'Wheat Beer',
+  'Hveitibjór':            'Wheat Beer',
+  'Hefeweizen':            'Wheat Beer',
+  'Weizen':                'Wheat Beer',
+  'Witbier':               'Wheat Beer',
+  'White Ale':             'Wheat Beer',
+
+  // Belgian family
+  'Belgian Ale':           'Belgian',
+  'Belgískt Öl':           'Belgian',
+  'Blonde':                'Belgian',
+  'Trappist':              'Belgian',
+  'Dubbel':                'Belgian',
+  'Tripel':                'Belgian',
+  'Quadrupel':             'Belgian',
+  'Abbey Ale':             'Belgian',
 }
 
 ChartJS.defaults.font = { family: 'Inter, system-ui, sans-serif' }
