@@ -492,18 +492,30 @@ function RaterProfile({ rater, beers, onClose }) {
           ))}
         </div>
 
-        {/* vínbúðin picks — always rendered so it's visible even when empty */}
-        <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0 }}>
-          <div style={{ padding: isMobile ? '12px 16px' : '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* vínbúðin picks — no overflow:hidden on outer so mobile scroll works */}
+        <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, padding: 0 }}>
+          <div style={{
+            padding: isMobile ? '12px 16px' : '14px 20px',
+            borderBottom: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', gap: 8,
+            borderTopLeftRadius: 20, borderTopRightRadius: 20,
+          }}>
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>FROM VÍNBÚÐIN</span>
             <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>— picked for your taste</span>
           </div>
           {vinLoading ? (
-            <div style={{ padding: '20px', fontSize: 12, color: 'var(--text-faint)', textAlign: 'center' }}>Loading…</div>
+            <div style={{ padding: '20px', fontSize: 12, color: 'var(--text-dim)', textAlign: 'center' }}>Loading…</div>
           ) : vinRecs.length === 0 ? (
-            <div style={{ padding: '20px', fontSize: 12, color: 'var(--text-faint)', textAlign: 'center' }}>No data — sync Vínbúðin from the main page first</div>
+            <div style={{ padding: '20px', fontSize: 12, color: 'var(--text-dim)', textAlign: 'center' }}>No data — sync Vínbúðin from the main page first</div>
           ) : (
-            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', touchAction: 'pan-x', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+            <div style={{
+              overflowX: 'scroll',
+              WebkitOverflowScrolling: 'touch',
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none',
+              borderBottomLeftRadius: 20,
+              borderBottomRightRadius: 20,
+            }}>
               <div style={{ display: 'flex', gap: 12, padding: '14px 16px', width: 'max-content' }}>
                 {vinRecs.map(rec => {
                   const relColor = rec.relevance >= 80 ? '#30d158' : rec.relevance >= 65 ? '#ffd60a' : rec.relevance >= 50 ? '#ff9f0a' : '#8e8e93'
@@ -525,7 +537,7 @@ function RaterProfile({ rater, beers, onClose }) {
                       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)' }}
                       onMouseLeave={e => { e.currentTarget.style.transform = '' }}
                     >
-                      <div style={{ height: 110, background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ height: 110, background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, borderRadius: '14px 14px 0 0' }}>
                         <img src={rec.image_url} alt={rec.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 10 }} onError={e => { e.currentTarget.style.display = 'none' }} />
                       </div>
                       <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
