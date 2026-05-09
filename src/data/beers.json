@@ -803,7 +803,7 @@
   {
     "id": 56,
     "name": "Snorri",
-    "style": "Íslenskt Öl",
+    "style": "Ale",
     "brewery": "Borg",
     "country": "Iceland",
     "abv": 5.3,
@@ -878,7 +878,7 @@
   {
     "id": 61,
     "name": "Team Freedom",
-    "style": "New England IPA",
+    "style": "NEIPA",
     "brewery": "Benchwarmers brewing",
     "country": "Sweden",
     "abv": 6.8,
