@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, BarElement,
@@ -6,7 +6,6 @@ import {
   Tooltip, Legend
 } from 'chart.js'
 import { Bar, Radar, Scatter } from 'react-chartjs-2'
-import beersData from './data/beers.json'
 
 ChartJS.register(
   CategoryScale, LinearScale, BarElement,
@@ -782,23 +781,44 @@ function BeerTable({ beers }) {
 
 // ── APP ───────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [customBeers, setCustomBeers] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('tyrolCustomBeers') || '[]') }
-    catch { return [] }
-  })
+  const [allBeers, setAllBeers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const allBeers = useMemo(() => [...beersData, ...customBeers], [customBeers])
+  useEffect(() => {
+    fetch('/api/beers')
+      .then(r => { if (!r.ok) throw new Error(r.statusText); return r.json() })
+      .then(data => { setAllBeers(data); setLoading(false) })
+      .catch(err => { setError(err.message); setLoading(false) })
+  }, [])
 
-  function addBeer(beer) {
-    const next = [...customBeers, beer]
-    setCustomBeers(next)
-    localStorage.setItem('tyrolCustomBeers', JSON.stringify(next))
+  async function addBeer(beer) {
+    const res = await fetch('/api/beers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(beer),
+    })
+    if (!res.ok) return
+    const { id } = await res.json()
+    setAllBeers(prev => [...prev, { ...beer, id }])
   }
 
   const totalRatings = useMemo(() => allBeers.reduce((s, b) => s + b.ratingCount, 0), [allBeers])
   const scored       = useMemo(() => allBeers.filter(b => b.avg != null), [allBeers])
   const avgScore     = useMemo(() => scored.length ? +(scored.reduce((s, b) => s + b.avg, 0) / scored.length).toFixed(1) : 0, [scored])
   const topBeer      = useMemo(() => [...scored].sort((a, b) => b.avg - a.avg)[0], [scored])
+
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'rgba(255,255,255,0.4)', fontSize: 14, letterSpacing: 2 }}>
+      loading…
+    </div>
+  )
+
+  if (error) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#ff375f', fontSize: 14 }}>
+      failed to load: {error}
+    </div>
+  )
 
   return (
     <div style={{ maxWidth: 1080, margin: '0 auto', padding: '0 28px 100px' }}>

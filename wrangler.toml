@@ -1,0 +1,8 @@
+name = "tyrolwiki"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "./dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tyrolwiki"
+database_id = "bc24af72-f4d2-49a5-9deb-087fd4d547ea"
