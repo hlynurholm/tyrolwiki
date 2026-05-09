@@ -1,53 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap');
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --wood:       #180c06;
-  --wood2:      #241208;
-  --wood3:      #321a0c;
-  --brass:      #d4a820;
-  --brass-light:#f0d870;
-  --brass-dark: #8b6010;
-  --parchment:  #f4e4c0;
-  --parchment2: #ead8a4;
-  --ink:        #1e0e06;
-  --ink2:       #5a3818;
-  --ink3:       #9a7040;
-  --amber:      #d4a820;
-  --green:      #2a6a3a;
-  --red:        #7a1818;
-  --font:       'Inter', system-ui, sans-serif;
-  --serif:      'Playfair Display', Georgia, serif;
+  --bg:      #06060c;
+  --surface: rgba(255,255,255,0.06);
+  --surface2: rgba(255,255,255,0.09);
+  --border:  rgba(255,255,255,0.09);
+  --border2: rgba(255,255,255,0.15);
+  --text:    #ffffff;
+  --text2:   rgba(255,255,255,0.55);
+  --text3:   rgba(255,255,255,0.28);
+  --accent:  #ff9f0a;
+  --green:   #30d158;
+  --blue:    #0a84ff;
+  --red:     #ff375f;
+  --yellow:  #ffd60a;
+  --font:    'Inter', system-ui, sans-serif;
 }
 
 html, body, #root { min-height: 100%; }
 
 body {
   font-family: var(--font);
-  background-color: #180c06;
+  background-color: #06060c;
   background-image:
-    repeating-linear-gradient(87deg,  transparent 0px, transparent 4px,  rgba(0,0,0,0.07) 4px,  rgba(0,0,0,0.07) 5px),
-    repeating-linear-gradient(89deg,  transparent 0px, transparent 12px, rgba(255,180,60,0.018) 12px, rgba(255,180,60,0.018) 13px),
-    repeating-linear-gradient(91deg,  transparent 0px, transparent 28px, rgba(0,0,0,0.09) 28px, rgba(0,0,0,0.09) 29px),
-    repeating-linear-gradient(88deg,  transparent 0px, transparent 55px, rgba(255,160,40,0.012) 55px, rgba(255,160,40,0.012) 57px),
-    linear-gradient(170deg, #1e1008 0%, #180c06 25%, #221006 50%, #1a0c06 75%, #1e0e06 100%);
-  color: var(--parchment);
+    radial-gradient(ellipse at 15% -10%,  rgba(120,60,255,0.13) 0%, transparent 55%),
+    radial-gradient(ellipse at 88% 108%,  rgba(255,130,20,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 60% 45%,   rgba(10,132,255,0.04) 0%, transparent 60%);
+  background-attachment: fixed;
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
 button { font-family: var(--font); cursor: pointer; border: none; background: none; color: inherit; }
 
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track {
-  background: linear-gradient(90deg, #180c06, #241208, #180c06);
-  border-left: 1px solid rgba(212,168,32,0.1);
-}
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #d4a820, #8b6010, #d4a820);
-  border-radius: 2px;
-  border: 1px solid rgba(0,0,0,0.4);
-}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-::selection { background: rgba(212,168,32,0.3); color: #f4e4c0; }
+::selection { background: rgba(255,159,10,0.25); }
