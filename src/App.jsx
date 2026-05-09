@@ -492,14 +492,16 @@ function RaterProfile({ rater, beers, onClose }) {
 
         {/* vínbúðin picks */}
         {vinRecs.length > 0 && (
-          <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0 }}>
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0, ...(isMobile ? { display: 'flex', flexDirection: 'column', maxHeight: 300 } : {}) }}>
+            <div style={{ padding: isMobile ? '12px 16px' : '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>FROM VÍNBÚÐIN</span>
               <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>— picked for your taste</span>
             </div>
-            <div style={{ overflowX: 'auto', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
-              <div style={{ display: 'flex', gap: 12, padding: '14px 16px', width: 'max-content' }}>
-                {vinRecs.map(rec => {
+
+            {isMobile ? (
+              /* mobile: vertical scrollable list */
+              <div style={{ overflowY: 'auto', flex: 1 }}>
+                {vinRecs.map((rec, i) => {
                   const relColor = rec.relevance >= 80 ? '#30d158' : rec.relevance >= 65 ? '#ffd60a' : rec.relevance >= 50 ? '#ff9f0a' : '#8e8e93'
                   return (
                     <a
@@ -508,46 +510,75 @@ function RaterProfile({ rater, beers, onClose }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        width: 130, flexShrink: 0,
-                        borderRadius: 14, overflow: 'hidden',
-                        background: dark ? 'var(--input-bg)' : '#f5f5f7',
-                        border: '1px solid var(--border)',
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '10px 16px',
+                        borderBottom: i < vinRecs.length - 1 ? '1px solid var(--border)' : 'none',
                         textDecoration: 'none', color: 'inherit',
-                        display: 'flex', flexDirection: 'column',
-                        transition: 'transform 0.15s',
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)' }}
-                      onMouseLeave={e => { e.currentTarget.style.transform = '' }}
                     >
-                      <div style={{ height: 110, background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <img
-                          src={rec.image_url} alt={rec.name}
-                          style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 10 }}
-                          onError={e => { e.currentTarget.style.display = 'none' }}
-                        />
+                      <div style={{ width: 40, height: 40, background: '#ffffff', borderRadius: 8, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}>
+                        <img src={rec.image_url} alt={rec.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }} onError={e => { e.currentTarget.style.display = 'none' }} />
                       </div>
-                      <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        <div style={{ fontWeight: 700, fontSize: 11, lineHeight: 1.3, color: 'var(--text)' }}>{rec.name}</div>
-                        {rec.brewery && <div style={{ fontSize: 9, color: 'var(--text-faint)' }}>{rec.brewery}</div>}
-                        {rec.style && (
-                          <span style={{
-                            fontSize: 8, fontWeight: 700, letterSpacing: 0.5, padding: '2px 6px', marginTop: 3,
-                            borderRadius: 20, background: 'var(--input-bg)', color: 'var(--text-dim)',
-                            border: '1px solid var(--border)', alignSelf: 'flex-start',
-                          }}>{rec.style}</span>
-                        )}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 'auto', paddingTop: 6 }}>
-                          <div style={{ flex: 1, height: 2, borderRadius: 1, background: 'var(--border-mid)', overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${rec.relevance}%`, background: relColor, borderRadius: 1 }} />
-                          </div>
-                          <span style={{ fontSize: 8, color: relColor, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{rec.relevance.toFixed(0)}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rec.name}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 1 }}>{rec.brewery}{rec.style ? ` · ${rec.style}` : ''}</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                        <div style={{ width: 40, height: 2, borderRadius: 1, background: 'var(--border-mid)', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${rec.relevance}%`, background: relColor, borderRadius: 1 }} />
                         </div>
+                        <span style={{ fontSize: 10, color: relColor, fontWeight: 700, fontVariantNumeric: 'tabular-nums', minWidth: 20, textAlign: 'right' }}>{rec.relevance.toFixed(0)}</span>
                       </div>
                     </a>
                   )
                 })}
               </div>
-            </div>
+            ) : (
+              /* desktop: horizontal scroll strip */
+              <div style={{ overflowX: 'auto', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+                <div style={{ display: 'flex', gap: 12, padding: '14px 16px', width: 'max-content' }}>
+                  {vinRecs.map(rec => {
+                    const relColor = rec.relevance >= 80 ? '#30d158' : rec.relevance >= 65 ? '#ffd60a' : rec.relevance >= 50 ? '#ff9f0a' : '#8e8e93'
+                    return (
+                      <a
+                        key={rec.id}
+                        href={rec.product_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          width: 130, flexShrink: 0,
+                          borderRadius: 14, overflow: 'hidden',
+                          background: dark ? 'var(--input-bg)' : '#f5f5f7',
+                          border: '1px solid var(--border)',
+                          textDecoration: 'none', color: 'inherit',
+                          display: 'flex', flexDirection: 'column',
+                          transition: 'transform 0.15s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)' }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = '' }}
+                      >
+                        <div style={{ height: 110, background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <img src={rec.image_url} alt={rec.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 10 }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                        </div>
+                        <div style={{ padding: '10px 10px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                          <div style={{ fontWeight: 700, fontSize: 11, lineHeight: 1.3, color: 'var(--text)' }}>{rec.name}</div>
+                          {rec.brewery && <div style={{ fontSize: 9, color: 'var(--text-faint)' }}>{rec.brewery}</div>}
+                          {rec.style && (
+                            <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: 0.5, padding: '2px 6px', marginTop: 3, borderRadius: 20, background: 'var(--input-bg)', color: 'var(--text-dim)', border: '1px solid var(--border)', alignSelf: 'flex-start' }}>{rec.style}</span>
+                          )}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 'auto', paddingTop: 6 }}>
+                            <div style={{ flex: 1, height: 2, borderRadius: 1, background: 'var(--border-mid)', overflow: 'hidden' }}>
+                              <div style={{ height: '100%', width: `${rec.relevance}%`, background: relColor, borderRadius: 1 }} />
+                            </div>
+                            <span style={{ fontSize: 8, color: relColor, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{rec.relevance.toFixed(0)}</span>
+                          </div>
+                        </div>
+                      </a>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
