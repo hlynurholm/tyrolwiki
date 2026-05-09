@@ -398,6 +398,7 @@ function AddBeerForm({ beers, onAdd, onUpdate }) {
 // ── RATER PROFILE ─────────────────────────────────────────────────────────────
 function RaterProfile({ rater, beers, onClose }) {
   const dark = useTheme()
+  const isMobile = useIsMobile()
   const color = RATER_COLORS[rater]
   const [vinRecs, setVinRecs] = useState([])
 
@@ -449,7 +450,7 @@ function RaterProfile({ rater, beers, onClose }) {
         backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
         overflowY: 'auto',
         display: 'flex', justifyContent: 'center',
-        padding: '24px 16px 60px',
+        padding: isMobile ? '12px 10px 60px' : '24px 16px 60px',
       }}
     >
       <div style={{ width: '100%', maxWidth: 680, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -480,10 +481,10 @@ function RaterProfile({ rater, beers, onClose }) {
         </div>
 
         {/* stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(5, 1fr)', gap: isMobile ? 8 : 10 }}>
           {[['Avg', avg, null], ['Min', min, '#ff375f'], ['Max', max, '#30d158'], ['≥ 85', generous, '#30d158'], ['< 40', harsh, '#ff375f']].map(([l, v, col]) => (
-            <div key={l} style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 14, padding: '14px 12px', textAlign: 'center' }}>
-              <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: -1, color: col || 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{v ?? '—'}</div>
+            <div key={l} style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 14, padding: isMobile ? '10px 8px' : '14px 12px', textAlign: 'center' }}>
+              <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 900, letterSpacing: -1, color: col || 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{v ?? '—'}</div>
               <div style={{ fontSize: 9, color: 'var(--text-faint)', marginTop: 4, letterSpacing: 1.5, fontWeight: 700 }}>{l}</div>
             </div>
           ))}
@@ -550,12 +551,12 @@ function RaterProfile({ rater, beers, onClose }) {
           </div>
         )}
 
-        {/* try next + all ratings side by side */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        {/* try next + all ratings side by side on desktop, stacked on mobile */}
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
 
           {/* try next */}
-          <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', maxHeight: 460 }}>
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', maxHeight: isMobile ? 300 : 460 }}>
+            <div style={{ padding: isMobile ? '12px 16px' : '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>TRY NEXT</span>
             </div>
             <div style={{ overflowY: 'auto', flex: 1 }}>
@@ -563,8 +564,8 @@ function RaterProfile({ rater, beers, onClose }) {
                 <div style={{ padding: '20px', fontSize: 12, color: 'var(--text-faint)', textAlign: 'center' }}>No suggestions yet</div>
               ) : tryNext.map((b, i) => (
                 <div key={b.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '11px 20px',
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: isMobile ? '10px 16px' : '11px 20px',
                   borderBottom: i < tryNext.length - 1 ? '1px solid var(--border)' : 'none',
                   transition: 'background 0.1s',
                 }}
@@ -576,7 +577,7 @@ function RaterProfile({ rater, beers, onClose }) {
                     <div style={{ fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</div>
                     <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 1 }}>{b.brewery}</div>
                   </div>
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', gap: isMobile ? 4 : 6, flexShrink: 0 }}>
                     {RATERS.filter(r => r !== rater).map(r => b.otherScores[r] != null && (
                       <div key={r} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                         <span style={{ fontSize: 8, fontWeight: 700, color: RATER_COLORS[r] }}>{r[0]}</span>
@@ -590,15 +591,15 @@ function RaterProfile({ rater, beers, onClose }) {
           </div>
 
           {/* all ratings */}
-          <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', maxHeight: 460 }}>
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+          <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', maxHeight: isMobile ? 300 : 460 }}>
+            <div style={{ padding: isMobile ? '12px 16px' : '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>ALL RATINGS</span>
             </div>
             <div style={{ overflowY: 'auto', flex: 1 }}>
               {rated.map((b, i) => (
                 <div key={b.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '11px 20px',
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: isMobile ? '10px 16px' : '11px 20px',
                   borderBottom: i < rated.length - 1 ? '1px solid var(--border)' : 'none',
                   transition: 'background 0.1s',
                 }}
@@ -610,7 +611,7 @@ function RaterProfile({ rater, beers, onClose }) {
                     <div style={{ fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</div>
                     <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 1 }}>{b.brewery}{b.style ? ` · ${b.style}` : ''}</div>
                   </div>
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', gap: isMobile ? 4 : 6, flexShrink: 0 }}>
                     {RATERS.filter(r => r !== rater).map(r => b.ratings[r] != null && (
                       <div key={r} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                         <span style={{ fontSize: 8, fontWeight: 700, color: RATER_COLORS[r] }}>{r[0]}</span>
