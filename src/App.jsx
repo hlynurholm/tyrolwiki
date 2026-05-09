@@ -470,6 +470,8 @@ function StylesSection({ beers }) {
 
 // ── RATERS ────────────────────────────────────────────────────────────────────
 function RatersSection({ beers }) {
+  const [hoveredRater, setHoveredRater] = useState(null)
+
   const stats = useMemo(() => RATERS.map(r => {
     const scores = beers.map(b => b.ratings[r]).filter(v => v != null)
     return {
@@ -485,21 +487,24 @@ function RatersSection({ beers }) {
 
   const radarData = useMemo(() => ({
     labels: RADAR_CATEGORIES,
-    datasets: RATERS.map(r => ({
-      label: r,
-      spanGaps: false,
-      data: RADAR_CATEGORIES.map(cat => {
-        const scores = beers.filter(b => STYLE_TO_RADAR[b.style] === cat && b.ratings[r] != null).map(b => b.ratings[r])
-        return scores.length ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : null
-      }),
-      borderColor: RATER_COLORS[r],
-      backgroundColor: RATER_COLORS[r] + '14',
-      borderWidth: 2,
-      pointRadius: 3,
-      pointBackgroundColor: RATER_COLORS[r],
-      pointBorderColor: 'transparent',
-    }))
-  }), [beers])
+    datasets: RATERS.map(r => {
+      const active = !hoveredRater || hoveredRater === r
+      return {
+        label: r,
+        spanGaps: false,
+        data: RADAR_CATEGORIES.map(cat => {
+          const scores = beers.filter(b => STYLE_TO_RADAR[b.style] === cat && b.ratings[r] != null).map(b => b.ratings[r])
+          return scores.length ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : null
+        }),
+        borderColor: active ? RATER_COLORS[r] : RATER_COLORS[r] + '20',
+        backgroundColor: active ? RATER_COLORS[r] + '22' : RATER_COLORS[r] + '05',
+        borderWidth: active ? 2.5 : 1,
+        pointRadius: active ? 4 : 2,
+        pointBackgroundColor: active ? RATER_COLORS[r] : RATER_COLORS[r] + '30',
+        pointBorderColor: 'transparent',
+      }
+    })
+  }), [beers, hoveredRater])
 
   const radarOpts = {
     responsive: true, maintainAspectRatio: false,
@@ -513,7 +518,7 @@ function RatersSection({ beers }) {
       },
     },
     plugins: {
-      legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.45)', boxWidth: 8, padding: 16, font: { size: 10 }, usePointStyle: true, pointStyle: 'circle' } },
+      legend: { display: false },
       tooltip: { ...tooltipStyle },
     },
   }
@@ -569,8 +574,30 @@ function RatersSection({ beers }) {
           <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
             <CardLabel>Taste Profile by Style</CardLabel>
           </div>
-          <div style={{ padding: '16px', height: 320 }}>
+          <div style={{ padding: '16px', height: 300 }}>
             <Radar data={radarData} options={radarOpts} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, padding: '0 16px 16px', flexWrap: 'wrap' }}>
+            {RATERS.map(r => {
+              const active = !hoveredRater || hoveredRater === r
+              return (
+                <div
+                  key={r}
+                  onMouseEnter={() => setHoveredRater(r)}
+                  onMouseLeave={() => setHoveredRater(null)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '5px 12px', borderRadius: 20, cursor: 'default',
+                    background: active ? RATER_COLORS[r] + '18' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${active ? RATER_COLORS[r] + '55' : 'rgba(255,255,255,0.07)'}`,
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: active ? RATER_COLORS[r] : 'rgba(255,255,255,0.2)', boxShadow: active ? `0 0 6px ${RATER_COLORS[r]}` : 'none', transition: 'all 0.15s' }} />
+                  <span style={{ fontSize: 11, fontWeight: 600, color: active ? RATER_COLORS[r] : 'rgba(255,255,255,0.25)', transition: 'color 0.15s' }}>{r}</span>
+                </div>
+              )
+            })}
           </div>
         </div>
         <Card>
