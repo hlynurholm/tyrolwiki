@@ -37,7 +37,7 @@ export async function onRequestPost({ env }) {
       if (!res.ok) return null
       const html = await res.text()
       const desc = extractDescription(html)
-      const inStock = !html.includes('Því miður er varan hvergi fáanleg')
+      const inStock = hasCapitalStock(html)
       return { id, desc, tags: extractTags(desc), inStock }
     })
   )
@@ -64,11 +64,21 @@ export async function onRequestPost({ env }) {
 }
 
 function extractDescription(html) {
-  // First <p> inside .hidden.entire-text is the specific tasting notes
   const m = html.match(/class="hidden entire-text"[^>]*>\s*<p>([\s\S]*?)<\/p>/i)
   if (m) {
     const text = m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
     if (text.length > 5) return text
   }
   return null
+}
+
+function hasCapitalStock(html) {
+  const tableMatch = html.match(/<table[^>]*TableStockStatusHofudborgarsvaedid[^>]*>([\s\S]*?)<\/table>/i)
+  if (!tableMatch) return false
+  const rowRe = /<a[^>]*>([^<]+)<\/a><\/td><td[^>]*stockstatus[^>]*>(\d+)\s+stykki/gi
+  let m
+  while ((m = rowRe.exec(tableMatch[1])) !== null) {
+    if (parseInt(m[2], 10) > 0) return true
+  }
+  return false
 }

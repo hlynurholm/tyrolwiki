@@ -56,12 +56,11 @@ export async function onRequestGet({ params, env }) {
       ?? html.match(/Eining[^<]*?(\d{2,4})\s*ml/i)
     if (volMatch) volume = volMatch[1] + ' ml'
 
-    const outOfStock = html.includes('Því miður er varan hvergi fáanleg')
-    if (outOfStock && env?.DB) {
+    if (stores.length === 0 && env?.DB) {
       await env.DB.prepare('UPDATE vinbudin_beers SET in_stock = 0 WHERE id = ?').bind(productId).run().catch(() => {})
     }
 
-    return Response.json({ stores, description, price, volume, outOfStock }, { headers: CORS })
+    return Response.json({ stores, description, price, volume }, { headers: CORS })
   } catch (err) {
     return Response.json({ stores: [], description: null, price: null, volume: null, error: err.message }, { headers: CORS })
   }
