@@ -206,6 +206,168 @@ function Divider() {
   return <div style={{ height: 1, background: 'var(--divider-line)', margin: '0 0 60px' }} />
 }
 
+// ── BEER DETAIL PAGE ──────────────────────────────────────────────────────────
+function BeerDetailModal({ rec, onClose, zIndex = 400 }) {
+  const dark = useTheme()
+  const isMobile = useIsMobile()
+  const [stockData, setStockData] = useState(null)
+  const [stockLoading, setStockLoading] = useState(true)
+  const [stockError, setStockError] = useState(false)
+
+  useEffect(() => {
+    setStockData(null)
+    setStockLoading(true)
+    setStockError(false)
+    fetch(`/api/vinbudin/stock/${encodeURIComponent(rec.id)}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(d => setStockData(d.stores ?? []))
+      .catch(() => setStockError(true))
+      .finally(() => setStockLoading(false))
+  }, [rec.id])
+
+  useEffect(() => {
+    function onKey(e) { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  function rc(r) {
+    if (r >= 80) return '#30d158'
+    if (r >= 65) return '#ffd60a'
+    if (r >= 50) return '#ff9f0a'
+    return '#8e8e93'
+  }
+  const matchColor = rc(rec.relevance)
+
+  return (
+    <div
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      style={{
+        position: 'fixed', inset: 0, zIndex,
+        background: dark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.4)',
+        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+        overflowY: 'auto',
+        display: 'flex', justifyContent: 'center',
+        padding: isMobile ? '12px 10px 60px' : '24px 16px 60px',
+      }}
+    >
+      <div style={{ width: '100%', maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+        {/* ── header card ── */}
+        <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden' }}>
+          {/* image */}
+          <div style={{ height: isMobile ? 180 : 220, background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img
+              src={rec.image_url}
+              alt={rec.name}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 20 }}
+              onError={e => { e.currentTarget.style.display = 'none' }}
+            />
+          </div>
+
+          {/* name / info */}
+          <div style={{ padding: isMobile ? '16px 18px 20px' : '18px 22px 22px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 900, lineHeight: 1.25, color: 'var(--text)', letterSpacing: -0.5 }}>{rec.name}</div>
+                {rec.brewery && <div style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 4 }}>{rec.brewery}</div>}
+              </div>
+              <button
+                onClick={onClose}
+                style={{
+                  width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                  border: '1px solid var(--border-mid)',
+                  background: dark ? 'var(--glass-bg)' : 'rgba(0,0,0,0.06)',
+                  color: 'var(--text-dim)', fontSize: 16, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >✕</button>
+            </div>
+
+            {/* tags row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', marginTop: 12 }}>
+              {rec.style && (
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, padding: '3px 10px', borderRadius: 20, background: 'var(--input-bg)', color: 'var(--text-dim)', border: '1px solid var(--border)' }}>{rec.style}</span>
+              )}
+              {rec.abv != null && (
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, padding: '3px 10px', borderRadius: 20, background: 'var(--input-bg)', color: 'var(--text-dim)', border: '1px solid var(--border)' }}>{rec.abv}%</span>
+              )}
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, padding: '3px 10px', borderRadius: 20, background: `${matchColor}18`, color: matchColor, border: `1px solid ${matchColor}44` }}>
+                match {rec.relevance.toFixed(0)}
+              </span>
+            </div>
+
+            {/* relevance bar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14 }}>
+              <div style={{ flex: 1, height: 3, borderRadius: 2, background: 'var(--border-mid)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${rec.relevance}%`, background: matchColor, borderRadius: 2, boxShadow: `0 0 6px ${matchColor}` }} />
+              </div>
+              <span style={{ fontSize: 10, color: matchColor, fontWeight: 700, fontVariantNumeric: 'tabular-nums', minWidth: 22, textAlign: 'right' }}>{rec.relevance.toFixed(0)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── stock card ── */}
+        <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden' }}>
+          <div style={{ padding: isMobile ? '12px 18px' : '14px 22px', borderBottom: '1px solid var(--border)' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>WHERE TO BUY</span>
+          </div>
+
+          <div style={{ padding: isMobile ? '14px 18px' : '16px 22px' }}>
+            {stockLoading ? (
+              <div style={{ fontSize: 12, color: 'var(--text-faint)', padding: '8px 0' }}>Checking stock…</div>
+            ) : stockError ? (
+              <div style={{ fontSize: 12, color: 'var(--text-faint)', padding: '8px 0' }}>Could not load stock data</div>
+            ) : !stockData || stockData.length === 0 ? (
+              <div style={{ fontSize: 12, color: 'var(--text-faint)', padding: '8px 0' }}>Not in stock at any store right now</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {stockData.map((s, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: isMobile ? '10px 14px' : '11px 16px',
+                    borderRadius: 12,
+                    background: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                    border: '1px solid var(--border)',
+                  }}>
+                    <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{s.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>in stock</span>
+                      <span style={{
+                        fontSize: 15, fontWeight: 800, fontVariantNumeric: 'tabular-nums',
+                        color: s.stock >= 5 ? '#30d158' : s.stock >= 2 ? '#ffd60a' : '#ff9f0a',
+                        minWidth: 24, textAlign: 'right',
+                      }}>{s.stock}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── open on vínbúðin ── */}
+        <a
+          href={rec.product_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'block', textAlign: 'center',
+            background: 'linear-gradient(135deg, #0a84ff, #005ec4)',
+            color: '#ffffff', textDecoration: 'none',
+            borderRadius: 18, padding: isMobile ? '14px 0' : '16px 0',
+            fontSize: 13, fontWeight: 700, letterSpacing: 0.5,
+            boxShadow: '0 0 24px rgba(10,132,255,0.35)',
+          }}
+        >
+          Open on Vínbúðin ↗
+        </a>
+
+      </div>
+    </div>
+  )
+}
+
 // ── ADD BEER FORM ─────────────────────────────────────────────────────────────
 function AddBeerForm({ beers, onAdd, onUpdate }) {
   const [open, setOpen] = useState(false)
@@ -402,6 +564,7 @@ function RaterProfile({ rater, beers, onClose }) {
   const color = RATER_COLORS[rater]
   const [vinRecs, setVinRecs] = useState([])
   const [vinLoading, setVinLoading] = useState(true)
+  const [selectedRec, setSelectedRec] = useState(null)
 
   useEffect(() => {
     fetch(`/api/recommendations?rater=${encodeURIComponent(rater)}`)
@@ -444,6 +607,8 @@ function RaterProfile({ rater, beers, onClose }) {
   function handleBackdrop(e) { if (e.target === e.currentTarget) onClose() }
 
   return (
+    <>
+    {selectedRec && <BeerDetailModal rec={selectedRec} onClose={() => setSelectedRec(null)} zIndex={500} />}
     <div
       onClick={handleBackdrop}
       style={{
@@ -518,21 +683,19 @@ function RaterProfile({ rater, beers, onClose }) {
             }}>
               <div style={{ display: 'flex', gap: 12, padding: '14px 16px', width: 'max-content' }}>
                 {vinRecs.map(rec => {
-                  const relColor = rec.relevance >= 80 ? '#30d158' : rec.relevance >= 65 ? '#ffd60a' : rec.relevance >= 50 ? '#ff9f0a' : '#8e8e93'
+                  const rc = rec.relevance >= 80 ? '#30d158' : rec.relevance >= 65 ? '#ffd60a' : rec.relevance >= 50 ? '#ff9f0a' : '#8e8e93'
                   return (
-                    <a
+                    <div
                       key={rec.id}
-                      href={rec.product_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      onClick={() => setSelectedRec(rec)}
                       style={{
                         width: 130, flexShrink: 0,
                         borderRadius: 14, overflow: 'hidden',
                         background: dark ? 'var(--input-bg)' : '#f5f5f7',
                         border: '1px solid var(--border)',
-                        textDecoration: 'none', color: 'inherit',
                         display: 'flex', flexDirection: 'column',
                         transition: 'transform 0.15s',
+                        cursor: 'pointer',
                       }}
                       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)' }}
                       onMouseLeave={e => { e.currentTarget.style.transform = '' }}
@@ -548,12 +711,12 @@ function RaterProfile({ rater, beers, onClose }) {
                         )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 'auto', paddingTop: 6 }}>
                           <div style={{ flex: 1, height: 2, borderRadius: 1, background: 'var(--border-mid)', overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${rec.relevance}%`, background: relColor, borderRadius: 1 }} />
+                            <div style={{ height: '100%', width: `${rec.relevance}%`, background: rc, borderRadius: 1 }} />
                           </div>
-                          <span style={{ fontSize: 8, color: relColor, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{rec.relevance.toFixed(0)}</span>
+                          <span style={{ fontSize: 8, color: rc, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{rec.relevance.toFixed(0)}</span>
                         </div>
                       </div>
-                    </a>
+                    </div>
                   )
                 })}
               </div>
@@ -638,6 +801,7 @@ function RaterProfile({ rater, beers, onClose }) {
 
       </div>
     </div>
+    </>
   )
 }
 
@@ -1347,6 +1511,8 @@ function BeerTable({ beers, onUpdate }) {
 // ── RECOMMENDATIONS ───────────────────────────────────────────────────────────
 function RecommendationsSection({ recommendations, syncedAt, total, onSync, syncing }) {
   const dark = useTheme()
+  const [selectedRec, setSelectedRec] = useState(null)
+
   function relevanceColor(r) {
     if (r >= 80) return '#30d158'
     if (r >= 65) return '#ffd60a'
@@ -1359,6 +1525,8 @@ function RecommendationsSection({ recommendations, syncedAt, total, onSync, sync
     : 'Never synced'
 
   return (
+    <>
+    {selectedRec && <BeerDetailModal rec={selectedRec} onClose={() => setSelectedRec(null)} />}
     <section>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <SectionHead>Recommendations</SectionHead>
@@ -1386,7 +1554,7 @@ function RecommendationsSection({ recommendations, syncedAt, total, onSync, sync
       </div>
 
       <p style={{ fontSize: 12, color: 'var(--text-faint)', margin: '0 0 18px', lineHeight: 1.6 }}>
-        Beers available at Vínbúðin that we haven't tried yet, ranked by how well their style matches our ratings. Click any card to open it on Vínbúðin.
+        Beers available at Vínbúðin that we haven't tried yet, ranked by how well their style matches our ratings. Tap any card to see where it's in stock.
       </p>
 
       {recommendations.length === 0 && !syncing && (
@@ -1410,17 +1578,14 @@ function RecommendationsSection({ recommendations, syncedAt, total, onSync, sync
               WebkitOverflowScrolling: 'touch',
             }}>
             {recommendations.slice(0, 50).map(rec => (
-              <a
+              <div
                 key={rec.id}
-                href={rec.product_url}
-                target="_blank"
-                rel="noopener noreferrer"
+                onClick={() => setSelectedRec(rec)}
                 style={{
                   ...GLASS, borderRadius: 16, overflow: 'hidden',
                   display: 'flex', flexDirection: 'column',
                   flexShrink: 0, width: 180,
                   scrollSnapAlign: 'start',
-                  textDecoration: 'none', color: 'inherit',
                   transition: 'transform 0.15s, box-shadow 0.15s',
                   cursor: 'pointer',
                 }}
@@ -1474,13 +1639,14 @@ function RecommendationsSection({ recommendations, syncedAt, total, onSync, sync
                     </span>
                   </div>
                 </div>
-              </a>
+              </div>
             ))}
             </div>
           </div>
         </>
       )}
     </section>
+    </>
   )
 }
 
