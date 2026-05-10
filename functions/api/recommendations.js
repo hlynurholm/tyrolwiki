@@ -215,12 +215,33 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
 
   // Diversity cap: max 5 beers per style family so one style can't flood the list
   const famCounts = {}
-  return scored.filter(rec => {
+  const capped = scored.filter(rec => {
     const c = (famCounts[rec._fam] ?? 0)
     if (c >= 5) return false
     famCounts[rec._fam] = c + 1
     return true
   }).map(({ _fam, ...rest }) => rest)
+
+  // Shuffle within 5-point relevance tiers so the order feels fresh each load
+  // while still keeping higher-scoring beers roughly at the front
+  const TIER = 5
+  const tiers = []
+  for (const rec of capped) {
+    const t = Math.floor(rec.relevance / TIER)
+    if (!tiers[t]) tiers[t] = []
+    tiers[t].push(rec)
+  }
+  const result = []
+  for (let t = tiers.length - 1; t >= 0; t--) {
+    if (!tiers[t]) continue
+    const tier = tiers[t]
+    for (let i = tier.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [tier[i], tier[j]] = [tier[j], tier[i]]
+    }
+    result.push(...tier)
+  }
+  return result
 }
 
 // ─── handler ──────────────────────────────────────────────────────────────────
