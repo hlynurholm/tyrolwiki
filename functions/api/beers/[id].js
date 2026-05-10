@@ -1,11 +1,21 @@
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, PATCH, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, PATCH, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS })
+}
+
+export async function onRequestDelete({ params, env }) {
+  const id = parseInt(params.id)
+  const existing = await env.DB.prepare('SELECT id FROM beers WHERE id = ?').bind(id).first()
+  if (!existing) {
+    return Response.json({ error: 'not found' }, { status: 404, headers: CORS })
+  }
+  await env.DB.prepare('DELETE FROM beers WHERE id = ?').bind(id).run()
+  return Response.json({ ok: true }, { headers: CORS })
 }
 
 export async function onRequestPatch({ params, request, env }) {

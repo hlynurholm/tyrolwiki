@@ -1260,9 +1260,10 @@ const COLUMNS = [
   { key: 'Palli',   label: 'P',     align: 'center' },
   { key: 'avg',     label: 'Avg',   align: 'center' },
   { key: 'abv',     label: 'ABV',   align: 'center' },
+  { key: '_del',    label: '',      align: 'center' },
 ]
 
-function BeerTable({ beers, onUpdate }) {
+function BeerTable({ beers, onUpdate, onDelete }) {
   const isMobile = useIsMobile()
   const [search, setSearch]   = useState('')
   const [sortBy, setSortBy]   = useState('avg')
@@ -1344,7 +1345,7 @@ function BeerTable({ beers, onUpdate }) {
     caretColor: '#ff9f0a',
   }
 
-  const colTemplate = '1fr 100px 52px 52px 52px 52px 52px 48px'
+  const colTemplate = '1fr 100px 52px 52px 52px 52px 52px 48px 32px'
 
   return (
     <section>
@@ -1403,7 +1404,13 @@ function BeerTable({ beers, onUpdate }) {
                     )}
                   </div>
                 </div>
-                <ScoreBadge score={b.avg} size="md" />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <ScoreBadge score={b.avg} size="md" />
+                  <button
+                    onClick={() => { if (window.confirm(`Delete "${b.name}"?`)) onDelete(b.id) }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, opacity: 0.35, color: 'var(--text)', padding: 2 }}
+                  >✕</button>
+                </div>
               </div>
 
               {/* ratings row */}
@@ -1533,6 +1540,21 @@ function BeerTable({ beers, onUpdate }) {
               </div>
               <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-faint)', fontVariantNumeric: 'tabular-nums' }}>
                 {b.abv != null ? `${b.abv}%` : '—'}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button
+                  onClick={() => { if (window.confirm(`Delete "${b.name}"?`)) onDelete(b.id) }}
+                  title="Delete beer"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: 4, borderRadius: 6, fontSize: 13, opacity: 0.35,
+                    color: 'var(--text)', transition: 'opacity 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = '0.35'}
+                >
+                  ✕
+                </button>
               </div>
             </div>
           ))}
@@ -1774,6 +1796,12 @@ export default function App() {
     }
   }
 
+  async function deleteBeer(id) {
+    const res = await fetch(`/api/beers/${id}`, { method: 'DELETE' })
+    if (!res.ok) return
+    setAllBeers(prev => prev.filter(b => b.id !== id))
+  }
+
   async function addBeer(beer) {
     const res = await fetch('/api/beers', {
       method: 'POST',
@@ -1896,7 +1924,7 @@ export default function App() {
           <BreweriesSection beers={allBeers} />
           <StylesSection beers={allBeers} />
           <AbvSection beers={allBeers} />
-          <BeerTable beers={allBeers} onUpdate={updateBeer} />
+          <BeerTable beers={allBeers} onUpdate={updateBeer} onDelete={deleteBeer} />
         </div>
       </div>
     </ThemeCtx.Provider>
