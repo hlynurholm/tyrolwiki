@@ -213,35 +213,31 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
     })
     .sort((a, b) => b.relevance - a.relevance)
 
-  // Diversity cap: max 5 beers per style family so one style can't flood the list
+  // Style-specific caps (checked before family cap, scored list is already sorted desc)
+  const STYLE_CAPS = { tripel: 1, quadrupel: 2 }
+  const styleCounts = {}
   const famCounts = {}
-  const capped = scored.filter(rec => {
-    const c = (famCounts[rec._fam] ?? 0)
-    if (c >= 5) return false
-    famCounts[rec._fam] = c + 1
-    return true
-  }).map(({ _fam, ...rest }) => rest)
 
-  // Shuffle within 5-point relevance tiers so the order feels fresh each load
-  // while still keeping higher-scoring beers roughly at the front
-  const TIER = 5
-  const tiers = []
-  for (const rec of capped) {
-    const t = Math.floor(rec.relevance / TIER)
-    if (!tiers[t]) tiers[t] = []
-    tiers[t].push(rec)
-  }
-  const result = []
-  for (let t = tiers.length - 1; t >= 0; t--) {
-    if (!tiers[t]) continue
-    const tier = tiers[t]
-    for (let i = tier.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [tier[i], tier[j]] = [tier[j], tier[i]]
+  const capped = scored.filter(rec => {
+    const ns = normalize(rec.style ?? '')
+    for (const [key, cap] of Object.entries(STYLE_CAPS)) {
+      if (ns === key || ns.includes(key)) {
+        if ((styleCounts[key] ?? 0) >= cap) return false
+        styleCounts[key] = (styleCounts[key] ?? 0) + 1
+        break
+      }
     }
-    result.push(...tier)
+    if ((famCounts[rec._fam] ?? 0) >= 5) return false
+    famCounts[rec._fam] = (famCounts[rec._fam] ?? 0) + 1
+    return true
+  }).slice(0, 20).map(({ _fam, ...rest }) => rest)
+
+  // Full shuffle
+  for (let i = capped.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [capped[i], capped[j]] = [capped[j], capped[i]]
   }
-  return result
+  return capped
 }
 
 // ─── handler ──────────────────────────────────────────────────────────────────
