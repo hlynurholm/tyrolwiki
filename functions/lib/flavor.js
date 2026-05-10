@@ -1,32 +1,62 @@
-// Icelandic root → English flavor tag (substring match, lowercase)
+// Icelandic root → English flavor tag (substring match, lowercase only — accents preserved)
 export const FLAVOR_MAP = [
-  ['beisk',      'bitter'],
-  ['sæt',        'sweet'],   ['sykur',    'sweet'],
-  ['súr',        'sour'],    ['edik',     'sour'],
-  ['humal',      'hoppy'],
-  ['malt',       'malty'],
-  ['ávext',      'fruity'],  ['ávax',     'fruity'],
-  ['sítró',      'citrus'],  ['appelsín', 'citrus'],
-  ['greipald',   'citrus'],  ['lime',     'citrus'],
-  ['mangó',      'tropical'],['ananas',   'tropical'],
-  ['passion',    'tropical'],['kókos',    'tropical'],
-  ['kirsuber',   'berry'],   ['hindber',  'berry'],
-  ['brómber',    'berry'],   ['bláber',   'berry'],
-  ['jarðarber',  'berry'],
-  ['blóm',       'floral'],  ['lyktar',   'floral'],
-  ['brauð',      'bready'],  ['hafrar',   'bready'],  ['kex', 'bready'],
-  ['ristað',     'roasty'],  ['brennt',   'roasty'],
-  ['kaffi',      'coffee'],
-  ['súkkulaði',  'chocolate'],['kakó',    'chocolate'],
-  ['karamel',    'caramel'],
-  ['vaníl',      'vanilla'],
-  ['krydd',      'spicy'],   ['pipar',    'spicy'],   ['kanill', 'spicy'],
-  ['reyk',       'smoky'],
-  ['hveiti',     'wheat'],
-  ['ger',        'yeasty'],
-  ['fura',       'piney'],   ['gran',     'piney'],
-  ['jarðlæg',    'earthy'],
-  ['ferskur',    'fresh'],   ['hreinn',   'clean'],
+  // bitter
+  ['beisk',       'bitter'],
+  // sweet
+  ['sæt',         'sweet'],    ['sykur',     'sweet'],   ['hunang',    'sweet'],
+  // sour / tart
+  ['súr',         'sour'],     ['edik',      'sour'],    ['sýr',       'sour'],
+  // hoppy
+  ['humal',       'hoppy'],
+  // malty / grainy
+  ['malt',        'malty'],    ['barr',      'malty'],   ['korn',      'malty'],
+  ['bygg',        'malty'],
+  // fruity (general)
+  ['ávext',       'fruity'],   ['ávax',      'fruity'],  ['epli',      'fruity'],
+  ['pera',        'fruity'],   ['sveskj',    'fruity'],  ['plóm',      'fruity'],
+  ['ferskj',      'fruity'],   ['nektarín',  'fruity'],
+  // citrus
+  ['sítró',       'citrus'],   ['appelsín',  'citrus'],  ['greipald',  'citrus'],
+  ['lime',        'citrus'],   ['sítrón',    'citrus'],  ['líma',      'citrus'],
+  // tropical
+  ['mangó',       'tropical'], ['ananas',    'tropical'],['passion',   'tropical'],
+  ['kókos',       'tropical'], ['guava',     'tropical'], ['tróp',     'tropical'],
+  // berry
+  ['kirsuber',    'berry'],    ['hindber',   'berry'],   ['brómber',   'berry'],
+  ['bláber',      'berry'],    ['jarðarber', 'berry'],
+  // floral
+  ['blóm',        'floral'],   ['lyktar',    'floral'],  ['rósa',      'floral'],
+  ['lavend',      'floral'],
+  // bready
+  ['brauð',       'bready'],   ['hafrar',    'bready'],  ['kex',       'bready'],
+  ['bisk',        'bready'],
+  // roasty
+  ['ristað',      'roasty'],   ['brennt',    'roasty'],  ['kolin',     'roasty'],
+  // coffee
+  ['kaffi',       'coffee'],   ['espresso',  'coffee'],
+  // chocolate
+  ['súkkulaði',   'chocolate'],['kakó',      'chocolate'],
+  // caramel
+  ['karamel',     'caramel'],  ['toffee',    'caramel'],
+  // vanilla
+  ['vaníl',       'vanilla'],
+  // spicy
+  ['krydd',       'spicy'],    ['pipar',     'spicy'],   ['kanill',    'spicy'],
+  ['negull',      'spicy'],    ['kóríand',   'spicy'],   ['múskat',    'spicy'],
+  ['stjörnuanís', 'spicy'],    ['kardimóm',  'spicy'],
+  // smoky
+  ['reyk',        'smoky'],
+  // wheat
+  ['hveiti',      'wheat'],
+  // yeasty
+  ['ger',         'yeasty'],
+  // piney / herbal
+  ['fura',        'piney'],    ['gran',      'piney'],   ['jurt',      'piney'],
+  // earthy
+  ['jarðlæg',     'earthy'],   ['mold',      'earthy'],  ['sveppur',   'earthy'],
+  // fresh / clean
+  ['ferskur',     'fresh'],    ['hreinn',    'clean'],   ['ferskt',    'fresh'],
+  ['gras',        'fresh'],
 ]
 
 export function extractTags(description) {
