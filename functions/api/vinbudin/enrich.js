@@ -37,7 +37,10 @@ export async function onRequestPost({ env }) {
         ),
         image_url ? fetch(image_url, { method: 'HEAD' }) : Promise.resolve({ ok: false }),
       ])
-      if (!res.ok) return null
+      if (!res.ok) {
+        // Mark unavailable so it doesn't block the queue
+        return { id, desc: '', tags: [], inStock: false, hasImage: false }
+      }
       const html = await res.text()
       const desc = extractDescription(html)
       const inStock = isAvailable(html)
