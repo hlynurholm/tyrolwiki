@@ -1764,11 +1764,11 @@ export default function App() {
     try {
       const res = await fetch('/api/vinbudin/sync', { method: 'POST' })
       if (!res.ok) throw new Error('Sync failed')
-      const fresh = await fetch('/api/recommendations')
-      if (fresh.ok) setRecs(await fresh.json())
     } finally {
       setSyncing(false)
     }
+    // Enrich immediately after sync so recommendations populate
+    await runEnrich()
   }
 
   async function runEnrich() {
