@@ -37,7 +37,8 @@ export async function onRequestPost({ env }) {
       if (!res.ok) return null
       const html = await res.text()
       const desc = extractDescription(html)
-      return { id, desc, tags: extractTags(desc) }
+      const inStock = !html.includes('Því miður er varan hvergi fáanleg')
+      return { id, desc, tags: extractTags(desc), inStock }
     })
   )
 
@@ -47,9 +48,10 @@ export async function onRequestPost({ env }) {
     if (r.status !== 'fulfilled' || !r.value) continue
     const { id, desc, tags } = r.value
     try {
+      const inStock = r.value.inStock ? 1 : 0
       await env.DB.prepare(
-        'UPDATE vinbudin_beers SET description = ?, flavor_tags = ? WHERE id = ?'
-      ).bind(desc ?? '', JSON.stringify(tags), id).run()
+        'UPDATE vinbudin_beers SET description = ?, flavor_tags = ?, in_stock = ? WHERE id = ?'
+      ).bind(desc ?? '', JSON.stringify(tags), inStock, id).run()
       enriched++
     } catch (e) { /* skip */ }
   }
