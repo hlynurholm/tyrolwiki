@@ -214,7 +214,7 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
     .sort((a, b) => b.relevance - a.relevance)
 
   // Style-specific caps (checked before family cap, scored list is already sorted desc)
-  const STYLE_CAPS = { tripel: 1, quadrupel: 2 }
+  const STYLE_CAPS = { tripel: 2, quadrupel: 1 }
   const styleCounts = {}
   const famCounts = {}
 
