@@ -324,7 +324,8 @@ function BeerDetailModal({ rec, onClose, zIndex = 400 }) {
 
               {rec.matchedStyle && rec.styleCount > 0 && (
                 <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.6 }}>
-                  Based on <span style={{ color: 'var(--text)', fontWeight: 600 }}>{rec.styleCount} {rec.matchedStyle}</span> beer{rec.styleCount !== 1 ? 's' : ''} you've rated, averaging <span style={{ color: matchColor, fontWeight: 700 }}>{rec.relevance.toFixed(0)}</span>.
+                  Based on <span style={{ color: 'var(--text)', fontWeight: 600 }}>{rec.styleCount} {rec.matchedStyle}{rec.styleMatchType === 'family' ? ' family' : ''}</span> beer{rec.styleCount !== 1 ? 's' : ''} you've rated
+                  {rec.styleAvg != null && <>, averaging <span style={{ color: matchColor, fontWeight: 700 }}>{rec.styleAvg}</span></>}.
                 </div>
               )}
 

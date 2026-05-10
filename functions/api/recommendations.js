@@ -108,16 +108,22 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
     return e ? bayesian(e.sum, e.count, globalAvg) : null
   }
 
-  // Pre-build style examples for the UI explanation
+  // Style examples for UI — exact match first, fall back to family
   function styleExamples(ns, fam) {
-    return triedBeers
+    let list = triedBeers
       .filter(b => normalize(b.style ?? '') === ns && b.score != null)
       .sort((a, c) => c.score - a.score)
       .slice(0, 3)
-      .map(b => ({ name: b.name, score: +b.score.toFixed(0) }))
+    if (list.length === 0 && fam) {
+      list = triedBeers
+        .filter(b => getStyleFamily(normalize(b.style ?? '')) === fam && b.score != null)
+        .sort((a, c) => c.score - a.score)
+        .slice(0, 3)
+    }
+    return list.map(b => ({ name: b.name, score: +b.score.toFixed(0) }))
   }
 
-  return vinbudinBeers
+  const scored = vinbudinBeers
     .filter(vb => !isTried(vb, filterBeers))
     .map(vb => {
       const ns   = normalize(vb.style ?? '')
@@ -130,19 +136,20 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
       const exactScore  = b(stats.style, ns)
       const familyScore = b(stats.family, fam)
 
-      let styleScore, matchedStyle
+      let styleScore, matchedStyle, styleMatchType
       if (exactScore != null) {
-        // 60% exact + 30% family + 10% global
         const fPart = familyScore ?? globalAvg
-        styleScore  = 0.60 * exactScore + 0.30 * fPart + 0.10 * globalAvg
-        matchedStyle = ns
+        styleScore     = 0.60 * exactScore + 0.30 * fPart + 0.10 * globalAvg
+        matchedStyle   = ns
+        styleMatchType = 'exact'
       } else if (familyScore != null) {
-        // No exact match: 80% family + 20% global (slight penalty)
-        styleScore   = 0.80 * familyScore + 0.20 * globalAvg
-        matchedStyle = fam + ' (family)'
+        styleScore     = 0.80 * familyScore + 0.20 * globalAvg
+        matchedStyle   = fam
+        styleMatchType = 'family'
       } else {
-        styleScore   = globalAvg
-        matchedStyle = null
+        styleScore     = globalAvg
+        matchedStyle   = null
+        styleMatchType = null
       }
 
       // ── FLAVOR SCORE (45%) ──────────────────────────────────────────────────
@@ -152,7 +159,6 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
         if (tagScores.length > 0) {
           flavorScore = tagScores.reduce((s, v) => s + v, 0) / tagScores.length
 
-          // Interaction lift (only pairs with ≥3 rated samples)
           let liftSum = 0, liftN = 0
           for (let i = 0; i < tags.length; i++) {
             for (let j = i + 1; j < tags.length; j++) {
@@ -171,30 +177,50 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
       }
 
       // ── ABV & BREWERY ───────────────────────────────────────────────────────
-      const abvScore      = b(stats.abv, bkt) ?? globalAvg
-      const breweryScore  = b(stats.brewery, nb) ?? globalAvg
+      const abvScore     = b(stats.abv, bkt) ?? globalAvg
+      const breweryScore = b(stats.brewery, nb) ?? globalAvg
 
       // ── COMBINE ─────────────────────────────────────────────────────────────
       let relevance
       if (flavorScore != null) {
         relevance = 0.40 * styleScore + 0.45 * flavorScore + 0.10 * abvScore + 0.05 * breweryScore
       } else {
-        // Phase 1 only (no flavor data)
         relevance = 0.75 * styleScore + 0.15 * abvScore + 0.10 * breweryScore
       }
       relevance = Math.max(0, Math.min(100, relevance))
 
-      const styleCount = ns && stats.style[ns] ? stats.style[ns].count : 0
+      // styleCount: exact first, fall back to family
+      const exactCount  = ns && stats.style[ns] ? stats.style[ns].count : 0
+      const familyCount = fam && stats.family[fam] ? stats.family[fam].count : 0
+      const styleCount  = exactCount > 0 ? exactCount : familyCount
+
+      // styleAvg: average score of rated beers in matched category
+      const statEntry = exactCount > 0
+        ? stats.style[ns]
+        : (familyCount > 0 ? stats.family[fam] : null)
+      const styleAvg = statEntry ? +(statEntry.sum / statEntry.count).toFixed(0) : null
 
       return {
         ...vb,
         relevance:    +relevance.toFixed(1),
         matchedStyle,
+        styleMatchType,
         styleCount,
+        styleAvg,
         styleExamples: styleExamples(ns, fam),
+        _fam: fam ?? 'other',
       }
     })
     .sort((a, b) => b.relevance - a.relevance)
+
+  // Diversity cap: max 5 beers per style family so one style can't flood the list
+  const famCounts = {}
+  return scored.filter(rec => {
+    const c = (famCounts[rec._fam] ?? 0)
+    if (c >= 5) return false
+    famCounts[rec._fam] = c + 1
+    return true
+  }).map(({ _fam, ...rest }) => rest)
 }
 
 // ─── handler ──────────────────────────────────────────────────────────────────
