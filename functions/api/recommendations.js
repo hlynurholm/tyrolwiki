@@ -108,6 +108,12 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
     return e ? bayesian(e.sum, e.count, globalAvg) : null
   }
 
+  // Top flavor preferences for this rater/group — used in the "why this match" UI
+  const topFlavors = Object.entries(stats.flavor)
+    .map(([tag, e]) => ({ tag, avg: +bayesian(e.sum, e.count, globalAvg).toFixed(0), count: e.count }))
+    .sort((a, c) => c.avg - a.avg)
+    .slice(0, 8)
+
   // Style examples for UI — exact match first, fall back to family
   function styleExamples(ns, fam) {
     let list = triedBeers
@@ -200,6 +206,12 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
         : (familyCount > 0 ? stats.family[fam] : null)
       const styleAvg = statEntry ? +(statEntry.sum / statEntry.count).toFixed(0) : null
 
+      // Flavor tags on this beer that align with the rater's preferences
+      const matchedFlavors = tags.filter(t => {
+        const e = stats.flavor[t]
+        return e && bayesian(e.sum, e.count, globalAvg) > globalAvg
+      })
+
       return {
         ...vb,
         relevance:    +relevance.toFixed(1),
@@ -208,6 +220,8 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
         styleCount,
         styleAvg,
         styleExamples: styleExamples(ns, fam),
+        beerFlavors:   tags,
+        matchedFlavors,
         _fam: fam ?? 'other',
       }
     })
@@ -237,7 +251,7 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
     const j = Math.floor(Math.random() * (i + 1));
     [capped[i], capped[j]] = [capped[j], capped[i]]
   }
-  return capped
+  return { recommendations: capped, topFlavors }
 }
 
 // ─── handler ──────────────────────────────────────────────────────────────────
@@ -265,19 +279,19 @@ export async function onRequestGet({ env, request }) {
   }
 
   const syncedAt = vinbudinBeers[0]?.synced_at ?? null
-  let recommendations
+  let recommendations, topFlavors
 
   if (rater) {
     const raterBeers = allBeers
       .filter(b => b.ratings[rater] != null)
       .map(b => ({ ...b, score: b.ratings[rater] }))
-    recommendations = scoreRecommendations(vinbudinBeers, raterBeers, raterBeers)
+    ;({ recommendations, topFlavors } = scoreRecommendations(vinbudinBeers, raterBeers, raterBeers))
   } else {
     const groupBeers = allBeers
       .filter(b => b.avg != null)
       .map(b => ({ ...b, score: b.avg }))
-    recommendations = scoreRecommendations(vinbudinBeers, groupBeers, allBeers)
+    ;({ recommendations, topFlavors } = scoreRecommendations(vinbudinBeers, groupBeers, allBeers))
   }
 
-  return Response.json({ recommendations, syncedAt, total: vinbudinBeers.length }, { headers: CORS })
+  return Response.json({ recommendations, syncedAt, total: vinbudinBeers.length, topFlavors }, { headers: CORS })
 }

@@ -34,7 +34,13 @@ export async function onRequestPost({ env }) {
   })
 
   const toFetch = matches.filter(m => m.vbId !== null)
-  const notFound = matches.filter(m => m.vbId === null).map(m => m.beer.name)
+  const notFound = matches.filter(m => m.vbId === null)
+
+  // Mark unmatched beers with empty description so they don't keep blocking the queue
+  await Promise.all(notFound.map(({ beer }) =>
+    env.DB.prepare('UPDATE beers SET description = ?, flavor_tags = ? WHERE id = ?')
+      .bind('', '[]', beer.id).run().catch(() => {})
+  ))
 
   // Fetch product pages concurrently
   const fetched = await Promise.allSettled(
@@ -43,7 +49,7 @@ export async function onRequestPost({ env }) {
         `https://www.vinbudin.is/heim/vorur/stoek-vara.aspx/?productid=${vbId}`,
         { headers: { 'User-Agent': UA, Accept: 'text/html', 'Accept-Language': 'is,en;q=0.9' } }
       )
-      if (!res.ok) return null
+      if (!res.ok) return { id: beer.id, desc: '', tags: [] }
       const html = await res.text()
       const desc = extractDescription(html)
       return { id: beer.id, desc, tags: extractTags(desc) }
@@ -62,7 +68,7 @@ export async function onRequestPost({ env }) {
     } catch (e) { /* skip */ }
   }
 
-  return Response.json({ enriched, notFound, remaining: beers.length - enriched }, { headers: CORS })
+  return Response.json({ enriched, notFound: notFound.map(m => m.beer.name), remaining: beers.length - enriched }, { headers: CORS })
 }
 
 function extractDescription(html) {

@@ -207,7 +207,7 @@ function Divider() {
 }
 
 // ── BEER DETAIL PAGE ──────────────────────────────────────────────────────────
-function BeerDetailModal({ rec, onClose, zIndex = 400 }) {
+function BeerDetailModal({ rec, onClose, zIndex = 400, topFlavors = [] }) {
   const dark = useTheme()
   const isMobile = useIsMobile()
   const [pageData, setPageData] = useState(null)
@@ -307,46 +307,97 @@ function BeerDetailModal({ rec, onClose, zIndex = 400 }) {
         </div>
 
         {/* ── match explanation card ── */}
-        {(rec.matchedStyle || rec.styleCount > 0) && (
-          <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden' }}>
-            <div style={{ padding: isMobile ? '12px 18px' : '14px 22px', borderBottom: '1px solid var(--border)' }}>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>WHY THIS MATCH</span>
-            </div>
-            <div style={{ padding: isMobile ? '14px 18px' : '16px 22px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden' }}>
+          <div style={{ padding: isMobile ? '12px 18px' : '14px 22px', borderBottom: '1px solid var(--border)' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>WHY THIS MATCH</span>
+          </div>
+          <div style={{ padding: isMobile ? '14px 18px' : '16px 22px', display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-              {/* score bar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--border-mid)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${rec.relevance}%`, background: matchColor, borderRadius: 3, boxShadow: `0 0 8px ${matchColor}88` }} />
-                </div>
-                <span style={{ fontSize: 18, fontWeight: 900, color: matchColor, fontVariantNumeric: 'tabular-nums', minWidth: 32, textAlign: 'right' }}>{rec.relevance.toFixed(0)}</span>
+            {/* score bar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--border-mid)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${rec.relevance}%`, background: matchColor, borderRadius: 3, boxShadow: `0 0 8px ${matchColor}88` }} />
               </div>
+              <span style={{ fontSize: 18, fontWeight: 900, color: matchColor, fontVariantNumeric: 'tabular-nums', minWidth: 32, textAlign: 'right' }}>{rec.relevance.toFixed(0)}</span>
+            </div>
 
-              {rec.matchedStyle && rec.styleCount > 0 && (
+            {/* style section */}
+            {rec.matchedStyle && rec.styleCount > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--text-faint)' }}>STYLE</div>
                 <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.6 }}>
                   Based on <span style={{ color: 'var(--text)', fontWeight: 600 }}>{rec.styleCount} {rec.matchedStyle}{rec.styleMatchType === 'family' ? ' family' : ''}</span> beer{rec.styleCount !== 1 ? 's' : ''} you've rated
                   {rec.styleAvg != null && <>, averaging <span style={{ color: matchColor, fontWeight: 700 }}>{rec.styleAvg}</span></>}.
                 </div>
-              )}
+                {rec.styleExamples?.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {rec.styleExamples.map((ex, i) => (
+                      <div key={i} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '6px 12px', borderRadius: 10,
+                        background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                        border: '1px solid var(--border)',
+                      }}>
+                        <span style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>{ex.name}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(ex.score), fontVariantNumeric: 'tabular-nums' }}>{ex.score}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
-              {rec.styleExamples?.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                  {rec.styleExamples.map((ex, i) => (
-                    <div key={i} style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '7px 12px', borderRadius: 10,
-                      background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                      border: '1px solid var(--border)',
-                    }}>
-                      <span style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>{ex.name}</span>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(ex.score), fontVariantNumeric: 'tabular-nums' }}>{ex.score}</span>
-                    </div>
-                  ))}
+            {/* flavor section */}
+            {rec.beerFlavors?.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--text-faint)' }}>FLAVOR</div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {rec.beerFlavors.map(tag => {
+                    const matched = rec.matchedFlavors?.includes(tag)
+                    return (
+                      <span key={tag} style={{
+                        fontSize: 10, fontWeight: 700, letterSpacing: 0.5,
+                        padding: '3px 10px', borderRadius: 20,
+                        background: matched ? `${matchColor}20` : 'var(--input-bg)',
+                        color: matched ? matchColor : 'var(--text-faint)',
+                        border: `1px solid ${matched ? matchColor + '55' : 'var(--border)'}`,
+                      }}>
+                        {tag}
+                      </span>
+                    )
+                  })}
                 </div>
-              )}
-            </div>
+                {rec.matchedFlavors?.length > 0 ? (
+                  <div style={{ fontSize: 11, color: 'var(--text-faint)', lineHeight: 1.5 }}>
+                    Matches your preference for{' '}
+                    {rec.matchedFlavors.map((t, i) => (
+                      <span key={t}>
+                        <span style={{ color: 'var(--text)', fontWeight: 600 }}>{t}</span>
+                        {i < rec.matchedFlavors.length - 1 ? ', ' : ''}
+                      </span>
+                    ))}.
+                  </div>
+                ) : topFlavors.length > 0 && (
+                  <div style={{ fontSize: 11, color: 'var(--text-faint)', lineHeight: 1.5 }}>
+                    Your top flavors: {topFlavors.slice(0, 4).map((f, i) => (
+                      <span key={f.tag}>
+                        <span style={{ color: 'var(--text-dim)', fontWeight: 600 }}>{f.tag}</span>
+                        {i < Math.min(topFlavors.length, 4) - 1 ? ', ' : ''}
+                      </span>
+                    ))}.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* no data fallback */}
+            {!rec.matchedStyle && !rec.styleCount && !rec.beerFlavors?.length && (
+              <div style={{ fontSize: 12, color: 'var(--text-faint)' }}>
+                Run "Enrich flavor data" to see detailed match reasoning.
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* ── stock card ── */}
         <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden' }}>
@@ -598,13 +649,17 @@ function RaterProfile({ rater, beers, onClose }) {
   const isMobile = useIsMobile()
   const color = RATER_COLORS[rater]
   const [vinRecs, setVinRecs] = useState([])
+  const [vinTopFlavors, setVinTopFlavors] = useState([])
   const [vinLoading, setVinLoading] = useState(true)
   const [selectedRec, setSelectedRec] = useState(null)
 
   useEffect(() => {
     fetch(`/api/recommendations?rater=${encodeURIComponent(rater)}`)
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.recommendations) setVinRecs(d.recommendations.slice(0, 30)) })
+      .then(d => {
+        if (d?.recommendations) setVinRecs(d.recommendations.slice(0, 30))
+        if (d?.topFlavors) setVinTopFlavors(d.topFlavors)
+      })
       .catch(() => {})
       .finally(() => setVinLoading(false))
   }, [rater])
@@ -643,7 +698,7 @@ function RaterProfile({ rater, beers, onClose }) {
 
   return (
     <>
-    {selectedRec && <BeerDetailModal rec={selectedRec} onClose={() => setSelectedRec(null)} zIndex={500} />}
+    {selectedRec && <BeerDetailModal rec={selectedRec} topFlavors={vinTopFlavors} onClose={() => setSelectedRec(null)} zIndex={500} />}
     <div
       onClick={handleBackdrop}
       style={{
@@ -1566,7 +1621,7 @@ function BeerTable({ beers, onUpdate, onDelete }) {
 }
 
 // ── RECOMMENDATIONS ───────────────────────────────────────────────────────────
-function RecommendationsSection({ recommendations, syncedAt, total, onSync, syncing, onEnrich, enrichState }) {
+function RecommendationsSection({ recommendations, syncedAt, total, topFlavors = [], onSync, syncing, onEnrich, enrichState }) {
   const dark = useTheme()
   const [selectedRec, setSelectedRec] = useState(null)
 
@@ -1591,7 +1646,7 @@ function RecommendationsSection({ recommendations, syncedAt, total, onSync, sync
 
   return (
     <>
-    {selectedRec && <BeerDetailModal rec={selectedRec} onClose={() => setSelectedRec(null)} />}
+    {selectedRec && <BeerDetailModal rec={selectedRec} topFlavors={topFlavors} onClose={() => setSelectedRec(null)} />}
     <section>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <SectionHead>Recommendations</SectionHead>
@@ -1739,7 +1794,7 @@ export default function App() {
   const [allBeers, setAllBeers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(null)
-  const [recs, setRecs] = useState({ recommendations: [], syncedAt: null, total: 0 })
+  const [recs, setRecs] = useState({ recommendations: [], syncedAt: null, total: 0, topFlavors: [] })
   const [syncing, setSyncing] = useState(false)
   const [enrichState, setEnrichState] = useState({ running: false, phase: null, enriched: 0, remaining: null, done: false, error: null })
 
@@ -1916,6 +1971,7 @@ export default function App() {
             recommendations={recs.recommendations}
             syncedAt={recs.syncedAt}
             total={recs.total}
+            topFlavors={recs.topFlavors}
             onSync={syncVinbudin}
             syncing={syncing}
             onEnrich={runEnrich}
