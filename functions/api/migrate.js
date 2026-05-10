@@ -16,6 +16,7 @@ export async function onRequestPost({ env }) {
     'ALTER TABLE vinbudin_beers ADD COLUMN description TEXT',
     'ALTER TABLE vinbudin_beers ADD COLUMN flavor_tags TEXT',
     'ALTER TABLE vinbudin_beers ADD COLUMN in_stock INTEGER DEFAULT 1',
+    'ALTER TABLE vinbudin_beers ADD COLUMN has_image INTEGER DEFAULT 1',
   ]
   for (const sql of migrations) {
     try {

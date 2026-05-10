@@ -17,7 +17,7 @@ export async function onRequestOptions() {
 export async function onRequestPost({ env }) {
   // Grab next batch of beers missing a description
   const { results: beers } = await env.DB.prepare(
-    `SELECT id FROM vinbudin_beers WHERE description IS NULL ORDER BY id LIMIT ${BATCH}`
+    `SELECT id, image_url FROM vinbudin_beers WHERE description IS NULL ORDER BY id LIMIT ${BATCH}`
   ).all()
 
   if (!beers || beers.length === 0) {
@@ -27,18 +27,22 @@ export async function onRequestPost({ env }) {
     return Response.json({ enriched: 0, remaining: 0, total: count, done: true }, { headers: CORS })
   }
 
-  // Fetch all pages concurrently
+  // Fetch product pages and check image URLs concurrently
   const fetched = await Promise.allSettled(
-    beers.map(async ({ id }) => {
-      const res = await fetch(
-        `https://www.vinbudin.is/heim/vorur/stoek-vara.aspx/?productid=${id}`,
-        { headers: { 'User-Agent': UA, Accept: 'text/html', 'Accept-Language': 'is,en;q=0.9' } }
-      )
+    beers.map(async ({ id, image_url }) => {
+      const [res, imgRes] = await Promise.all([
+        fetch(
+          `https://www.vinbudin.is/heim/vorur/stoek-vara.aspx/?productid=${id}`,
+          { headers: { 'User-Agent': UA, Accept: 'text/html', 'Accept-Language': 'is,en;q=0.9' } }
+        ),
+        image_url ? fetch(image_url, { method: 'HEAD' }) : Promise.resolve({ ok: false }),
+      ])
       if (!res.ok) return null
       const html = await res.text()
       const desc = extractDescription(html)
       const inStock = hasCapitalStock(html)
-      return { id, desc, tags: extractTags(desc), inStock }
+      const hasImage = imgRes.ok
+      return { id, desc, tags: extractTags(desc), inStock, hasImage }
     })
   )
 
@@ -46,12 +50,11 @@ export async function onRequestPost({ env }) {
   let enriched = 0
   for (const r of fetched) {
     if (r.status !== 'fulfilled' || !r.value) continue
-    const { id, desc, tags } = r.value
+    const { id, desc, tags, inStock, hasImage } = r.value
     try {
-      const inStock = r.value.inStock ? 1 : 0
       await env.DB.prepare(
-        'UPDATE vinbudin_beers SET description = ?, flavor_tags = ?, in_stock = ? WHERE id = ?'
-      ).bind(desc ?? '', JSON.stringify(tags), inStock, id).run()
+        'UPDATE vinbudin_beers SET description = ?, flavor_tags = ?, in_stock = ?, has_image = ? WHERE id = ?'
+      ).bind(desc ?? '', JSON.stringify(tags), inStock ? 1 : 0, hasImage ? 1 : 0, id).run()
       enriched++
     } catch (e) { /* skip */ }
   }
