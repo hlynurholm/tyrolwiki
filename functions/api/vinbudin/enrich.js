@@ -40,7 +40,7 @@ export async function onRequestPost({ env }) {
       if (!res.ok) return null
       const html = await res.text()
       const desc = extractDescription(html)
-      const inStock = hasCapitalStock(html)
+      const inStock = isAvailable(html)
       const hasImage = imgRes.ok
       return { id, desc, tags: extractTags(desc), inStock, hasImage }
     })
@@ -75,7 +75,9 @@ function extractDescription(html) {
   return null
 }
 
-function hasCapitalStock(html) {
+function isAvailable(html) {
+  if (html.includes('Vara hættir')) return false
+  if (html.includes('Því miður er varan hvergi fáanleg')) return false
   const tableMatch = html.match(/<table[^>]*TableStockStatusHofudborgarsvaedid[^>]*>([\s\S]*?)<\/table>/i)
   if (!tableMatch) return false
   const rowRe = /<a[^>]*>([^<]+)<\/a><\/td><td[^>]*stockstatus[^>]*>(\d+)\s+stykki/gi

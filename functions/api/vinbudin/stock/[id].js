@@ -56,7 +56,10 @@ export async function onRequestGet({ params, env }) {
       ?? html.match(/Eining[^<]*?(\d{2,4})\s*ml/i)
     if (volMatch) volume = volMatch[1] + ' ml'
 
-    if (stores.length === 0 && env?.DB) {
+    const unavailable = stores.length === 0
+      || html.includes('Vara hættir')
+      || html.includes('Því miður er varan hvergi fáanleg')
+    if (unavailable && env?.DB) {
       await env.DB.prepare('UPDATE vinbudin_beers SET in_stock = 0 WHERE id = ?').bind(productId).run().catch(() => {})
     }
 

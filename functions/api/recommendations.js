@@ -251,7 +251,10 @@ export async function onRequestGet({ env, request }) {
     env.DB.prepare('SELECT name, brewery, style, abv, avg, ratings, description, flavor_tags FROM beers').all(),
   ])
 
-  const vinbudinBeers = (vbResult.results ?? []).filter(b => b.in_stock !== 0 && b.has_image !== 0)
+  // Only show beers that have been enriched (description not null) and passed all availability checks
+  const vinbudinBeers = (vbResult.results ?? []).filter(b =>
+    b.description !== null && b.in_stock === 1 && b.has_image === 1
+  )
   const allBeers = (beersResult.results ?? []).map(b => ({
     ...b,
     ratings: typeof b.ratings === 'string' ? JSON.parse(b.ratings) : (b.ratings ?? {}),
