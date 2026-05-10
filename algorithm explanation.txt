@@ -1,0 +1,121 @@
+MATCH RATING ALGORITHM — TYROLWIKI
+====================================
+
+GOAL
+----
+Score each unrated Vínbúðin beer 0–100 based on how well it matches the
+group's (or a single rater's) demonstrated taste preferences.
+
+CORE PROBLEM WITH THE OLD APPROACH
+-----------------------------------
+The old algorithm was: relevance = average score for beers of this style.
+One 90-rated IPA made every IPA look great. One bad stout tanked the whole
+dark beer category forever. No nuance, no confidence intervals.
+
+
+THE NEW ALGORITHM: WEIGHTED MULTI-FEATURE SCORING
+--------------------------------------------------
+
+  relevance = 0.40×StyleScore + 0.45×FlavorScore + 0.10×ABVScore + 0.05×BreweryScore
+
+When no flavor tag data is available (no description stored yet):
+  relevance = 0.75×StyleScore + 0.15×ABVScore + 0.10×BreweryScore
+
+
+SIGNAL 1 — STYLE SCORE (40%)
+-----------------------------
+Three-level blended signal:
+
+  StyleScore = 0.60×ExactStyleAvg + 0.30×FamilyAvg + 0.10×GlobalAvg
+
+- ExactStyleAvg: avg of your IPA ratings → directly scores IPAs
+- FamilyAvg: avg across all "IPA family" beers (IPA + NEIPA + DIPA + Session
+  IPA) → scores an IPA style you've never tried exactly
+- GlobalAvg: your all-time average → the floor that prevents wild inferences
+
+Style families defined:
+  lager:    Lager, Light Lager, Pilsner, Bock, Dunkel, Märzen, Zwickel
+  ipa:      IPA, Session IPA, NEIPA, Double IPA, DIPA, Black IPA, Belgian IPA
+  pale ale: Pale Ale, APA, Golden Ale, Saison, Farmhouse Ale, Kveik
+  amber:    Amber Ale, Red Ale, Irish Red Ale
+  wheat:    Wheat Beer, Hefeweizen, Witbier, White Ale
+  belgian:  Belgian Ale, Blonde, Tripel, Dubbel, Quadrupel, Trappist
+  dark:     Stout, Porter, Imperial Stout
+  sour:     Sour, Geuze, Lambic, Berliner Weisse, Gose
+
+Bayesian smoothing applied at every level:
+  smoothed = (rawSum + globalAvg × k) / (count + k),  where k = 3
+
+This means:
+  - 1 beer rated 90 → smoothed to ~75 (pulled toward global mean)
+  - 10 beers rated 90 → stays near 87
+  Directly solves the "one beer sample" noise problem.
+
+
+SIGNAL 2 — FLAVOR SCORE (45%)
+------------------------------
+Flavor tags are extracted from Vínbúðin tasting notes (Lýsing field) using
+a ~25-word Icelandic keyword vocabulary:
+
+  bitter, sweet, sour, hoppy, malty, fruity, citrus, tropical, berry,
+  floral, bready, roasty, coffee, chocolate, caramel, vanilla, spicy,
+  smoky, wheat, yeasty, piney, earthy, fresh
+
+For each flavor tag, compute: average rating of all beers the user has rated
+that contain that tag. This is their flavorPref[tag].
+
+For a candidate beer with tags [hoppy, bitter, fruity]:
+  FlavorScore = mean(flavorPref[hoppy], flavorPref[bitter], flavorPref[fruity])
+  (each Bayesian-smoothed with k=3)
+
+INTERACTION EFFECT (bonus within flavor scoring):
+Detect whether certain tag combinations score differently than individual
+tags would predict.
+
+  lift(tagA, tagB) = avg_score(beers with both A AND B)
+                     − mean(flavorPref[A], flavorPref[B])
+
+  FlavorScore += 0.3 × mean(lift for all tag pairs in this beer)
+
+Only applied to pairs with ≥3 rated samples (avoids fitting noise).
+With 50–100 rated beers, expect 5–10 reliable pairs.
+
+
+SIGNAL 3 — ABV PREFERENCE (10%)
+---------------------------------
+Bucket ABV into: low (≤3.5%), medium (3.5–5.5%), strong (5.5–8%),
+very strong (8%+). Average rating per bucket. Bayesian smoothed.
+
+Honest signal: some raters consistently rate very strong beers lower.
+
+
+SIGNAL 4 — BREWERY AFFINITY (5%)
+----------------------------------
+If you've rated other beers from this brewery, use that average.
+Small weight because one great beer doesn't mean everything is great.
+Bayesian smoothed.
+
+
+DATA REQUIREMENTS
+-----------------
+| Signal         | Data needed                      | Status                  |
+|----------------|----------------------------------|-------------------------|
+| Style          | Style on rated + VB beers        | Have it                 |
+| Style family   | Static mapping                   | Defined in code         |
+| Bayesian prior | Overall avg from rated beers     | Computed at runtime     |
+| Flavor tags    | Tasting notes on rated beers     | Scraped from VB pages   |
+| Flavor tags    | Tasting notes on VB beers        | Scraped during enrich   |
+| ABV buckets    | ABV on all beers                 | Already stored          |
+| Brewery        | Brewery names                    | Already stored          |
+
+The only new data requirement is flavor tags, obtained by scraping the
+Vínbúðin product page for each beer and running the Icelandic keyword map.
+
+
+IMPLEMENTATION PHASES
+---------------------
+Phase 1 (no new data): Style + Bayesian smoothing + family blending + ABV + brewery
+Phase 2 (with flavor data): Add flavor scoring and interaction effects
+
+The algorithm gracefully degrades: if no flavor tags exist for a beer,
+it uses the Phase 1 formula automatically.

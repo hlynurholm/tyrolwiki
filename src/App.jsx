@@ -1543,7 +1543,7 @@ function BeerTable({ beers, onUpdate }) {
 }
 
 // ── RECOMMENDATIONS ───────────────────────────────────────────────────────────
-function RecommendationsSection({ recommendations, syncedAt, total, onSync, syncing }) {
+function RecommendationsSection({ recommendations, syncedAt, total, onSync, syncing, onEnrich, enrichState }) {
   const dark = useTheme()
   const [selectedRec, setSelectedRec] = useState(null)
 
@@ -1558,16 +1558,41 @@ function RecommendationsSection({ recommendations, syncedAt, total, onSync, sync
     ? `Synced ${new Date(syncedAt).toLocaleDateString('is-IS', { day: 'numeric', month: 'short', year: 'numeric' })}`
     : 'Never synced'
 
+  const enrichLabel = enrichState.running
+    ? enrichState.phase === 'migrate' ? 'Migrating DB…'
+      : enrichState.phase === 'vb' ? `Enriching VB beers${enrichState.remaining != null ? ` (${enrichState.remaining} left)` : '…'}`
+      : 'Enriching rated beers…'
+    : enrichState.done ? `Done — ${enrichState.enriched} enriched`
+    : enrichState.error ? `Error: ${enrichState.error}`
+    : 'Enrich flavor data'
+
   return (
     <>
     {selectedRec && <BeerDetailModal rec={selectedRec} onClose={() => setSelectedRec(null)} />}
     <section>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <SectionHead>Recommendations</SectionHead>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {syncedAt && (
             <span style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: 1 }}>{syncLabel}</span>
           )}
+          <button
+            onClick={onEnrich}
+            disabled={enrichState.running}
+            title="Run DB migration + enrich all beers with flavor tags"
+            style={{
+              background: enrichState.done ? 'linear-gradient(135deg,#30d158,#1a8a36)' : enrichState.error ? 'linear-gradient(135deg,#ff375f,#c0003a)' : enrichState.running ? 'var(--input-bg)' : 'linear-gradient(135deg,#bf5af2,#7d1ab3)',
+              border: '1px solid rgba(191,90,242,0.35)',
+              borderRadius: 20, padding: '7px 14px',
+              fontSize: 11, fontWeight: 600, letterSpacing: 0.5,
+              color: enrichState.running ? 'var(--text-faint)' : '#ffffff',
+              cursor: enrichState.running ? 'default' : 'pointer',
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {enrichState.running ? '⏳ ' : '✦ '}{enrichLabel}
+          </button>
           <button
             onClick={onSync}
             disabled={syncing}
@@ -1693,6 +1718,7 @@ export default function App() {
   const [error, setError]     = useState(null)
   const [recs, setRecs] = useState({ recommendations: [], syncedAt: null, total: 0 })
   const [syncing, setSyncing] = useState(false)
+  const [enrichState, setEnrichState] = useState({ running: false, phase: null, enriched: 0, remaining: null, done: false, error: null })
 
   useEffect(() => {
     document.documentElement.toggleAttribute('data-dark', dark)
@@ -1719,6 +1745,32 @@ export default function App() {
       if (fresh.ok) setRecs(await fresh.json())
     } finally {
       setSyncing(false)
+    }
+  }
+
+  async function runEnrich() {
+    setEnrichState({ running: true, phase: 'migrate', enriched: 0, remaining: null, done: false, error: null })
+    try {
+      await fetch('/api/migrate', { method: 'POST' })
+      setEnrichState(s => ({ ...s, phase: 'vb', enriched: 0 }))
+      let total = 0
+      while (true) {
+        const r = await fetch('/api/vinbudin/enrich', { method: 'POST' })
+        if (!r.ok) throw new Error('VB enrich failed')
+        const d = await r.json()
+        total += d.enriched
+        setEnrichState(s => ({ ...s, enriched: total, remaining: d.remaining ?? null }))
+        if (d.done) break
+      }
+      setEnrichState(s => ({ ...s, phase: 'rated' }))
+      const r2 = await fetch('/api/enrich-rated', { method: 'POST' })
+      if (!r2.ok) throw new Error('Rated enrich failed')
+      const d2 = await r2.json()
+      const fresh = await fetch('/api/recommendations')
+      if (fresh.ok) setRecs(await fresh.json())
+      setEnrichState(s => ({ ...s, running: false, done: true, enriched: total + (d2.enriched ?? 0) }))
+    } catch (e) {
+      setEnrichState(s => ({ ...s, running: false, error: e.message }))
     }
   }
 
@@ -1837,6 +1889,8 @@ export default function App() {
             total={recs.total}
             onSync={syncVinbudin}
             syncing={syncing}
+            onEnrich={runEnrich}
+            enrichState={enrichState}
           />
           <CountriesSection beers={allBeers} />
           <BreweriesSection beers={allBeers} />
