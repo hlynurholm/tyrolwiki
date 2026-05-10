@@ -65,23 +65,47 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
     styleAvg[s] = styleScores[s] / styleCounts[s]
   }
 
+  // top-rated examples per style for the match explanation
+  const styleExamplesMap = {}
+  for (const s of Object.keys(styleAvg)) {
+    styleExamplesMap[s] = triedBeers
+      .filter(b => normalize(b.style ?? '') === s && b.score != null)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map(b => ({ name: b.name, score: +b.score.toFixed(0) }))
+  }
+
   return vinbudinBeers
     .filter(vb => !isTried(vb, filterBeers))
     .map(vb => {
       const ns = normalize(vb.style ?? '')
       let relevance = 50
+      let matchedStyle = null
+
       if (ns) {
         if (styleAvg[ns] != null) {
           relevance = styleAvg[ns]
+          matchedStyle = ns
         } else {
           for (const [style, avg] of Object.entries(styleAvg)) {
-            if (ns.includes(style) || style.includes(ns)) {
-              relevance = Math.max(relevance, avg)
+            if ((ns.includes(style) || style.includes(ns)) && avg > relevance) {
+              relevance = avg
+              matchedStyle = style
             }
           }
         }
       }
-      return { ...vb, relevance: +relevance.toFixed(1) }
+
+      const styleCount = matchedStyle ? (styleCounts[matchedStyle] ?? 0) : 0
+      const styleExamples = matchedStyle ? (styleExamplesMap[matchedStyle] ?? []) : []
+
+      return {
+        ...vb,
+        relevance: +relevance.toFixed(1),
+        matchedStyle,
+        styleCount,
+        styleExamples,
+      }
     })
     .sort((a, b) => b.relevance - a.relevance)
 }
