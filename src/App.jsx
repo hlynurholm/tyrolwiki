@@ -293,7 +293,6 @@ function BeerDetailModal({ rec, onClose, zIndex = 400, topFlavors = [] }) {
               {rec.abv != null && <span style={pill()}>{rec.abv}%</span>}
               {volume      && <span style={pill()}>{volume}</span>}
               {price       && <span style={pill()}>{price}</span>}
-              <span style={pill(null, matchColor)}>match {rec.relevance.toFixed(0)}</span>
             </div>
 
             {/* description */}
@@ -311,14 +310,6 @@ function BeerDetailModal({ rec, onClose, zIndex = 400, topFlavors = [] }) {
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'var(--text-dim)' }}>WHY THIS MATCH</span>
           </div>
           <div style={{ padding: isMobile ? '14px 18px' : '16px 22px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-
-            {/* score bar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--border-mid)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${rec.relevance}%`, background: matchColor, borderRadius: 3, boxShadow: `0 0 8px ${matchColor}88` }} />
-              </div>
-              <span style={{ fontSize: 18, fontWeight: 900, color: matchColor, fontVariantNumeric: 'tabular-nums', minWidth: 32, textAlign: 'right' }}>{rec.relevance.toFixed(0)}</span>
-            </div>
 
             {/* style section */}
             {rec.matchedStyle && rec.styleCount > 0 && (
@@ -798,12 +789,6 @@ function RaterProfile({ rater, beers, onClose }) {
                         {rec.style && (
                           <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: 0.5, padding: '2px 6px', marginTop: 3, borderRadius: 20, background: 'var(--input-bg)', color: 'var(--text-dim)', border: '1px solid var(--border)', alignSelf: 'flex-start' }}>{rec.style}</span>
                         )}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 'auto', paddingTop: 6 }}>
-                          <div style={{ flex: 1, height: 2, borderRadius: 1, background: 'var(--border-mid)', overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${rec.relevance}%`, background: rc, borderRadius: 1 }} />
-                          </div>
-                          <span style={{ fontSize: 8, color: rc, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{rec.relevance.toFixed(0)}</span>
-                        </div>
                       </div>
                     </div>
                   )
@@ -1777,20 +1762,6 @@ function RecommendationsSection({ recommendations, syncedAt, total, topFlavors =
                     )}
                   </div>
 
-                  {/* relevance bar */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 8 }}>
-                    <div style={{ flex: 1, height: 2, borderRadius: 1, background: 'var(--border-mid)', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%', width: `${rec.relevance}%`,
-                        background: relevanceColor(rec.relevance),
-                        borderRadius: 1,
-                        boxShadow: `0 0 4px ${relevanceColor(rec.relevance)}`,
-                      }} />
-                    </div>
-                    <span style={{ fontSize: 8, color: relevanceColor(rec.relevance), fontWeight: 700, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                      {rec.relevance.toFixed(0)}
-                    </span>
-                  </div>
                 </div>
               </div>
             ))}
