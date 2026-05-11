@@ -1621,7 +1621,7 @@ function BeerTable({ beers, onUpdate, onDelete }) {
 }
 
 // ── RECOMMENDATIONS ───────────────────────────────────────────────────────────
-function RecommendationsSection({ recommendations, syncedAt, total, topFlavors = [], onSync, syncing, onEnrich, enrichState }) {
+function RecommendationsSection({ recommendations, syncedAt, total, topFlavors = [], onSync, syncing, onEnrich, onReEnrichRated, enrichState }) {
   const dark = useTheme()
   const [selectedRec, setSelectedRec] = useState(null)
 
@@ -1654,6 +1654,23 @@ function RecommendationsSection({ recommendations, syncedAt, total, topFlavors =
           {syncedAt && (
             <span style={{ fontSize: 10, color: 'var(--text-faint)', letterSpacing: 1 }}>{syncLabel}</span>
           )}
+          <button
+            onClick={onReEnrichRated}
+            disabled={enrichState.running}
+            title="Reset and re-scrape flavor tags for all rated beers"
+            style={{
+              background: enrichState.running && enrichState.phase === 'rated' ? 'var(--input-bg)' : 'linear-gradient(135deg,#ff9f0a,#c47200)',
+              border: '1px solid rgba(255,159,10,0.35)',
+              borderRadius: 20, padding: '7px 14px',
+              fontSize: 11, fontWeight: 600, letterSpacing: 0.5,
+              color: enrichState.running ? 'var(--text-faint)' : '#ffffff',
+              cursor: enrichState.running ? 'default' : 'pointer',
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            ↺ Re-enrich rated
+          </button>
           <button
             onClick={onEnrich}
             disabled={enrichState.running}
@@ -1852,6 +1869,21 @@ export default function App() {
     }
   }
 
+  async function reEnrichRated() {
+    setEnrichState({ running: true, phase: 'rated', enriched: 0, remaining: null, done: false, error: null })
+    try {
+      await fetch('/api/reset-rated', { method: 'POST' })
+      const r = await fetch('/api/enrich-rated', { method: 'POST' })
+      if (!r.ok) throw new Error('Re-enrich failed')
+      const d = await r.json()
+      const fresh = await fetch('/api/recommendations')
+      if (fresh.ok) setRecs(await fresh.json())
+      setEnrichState(s => ({ ...s, running: false, done: true, enriched: d.enriched ?? 0 }))
+    } catch (e) {
+      setEnrichState(s => ({ ...s, running: false, error: e.message }))
+    }
+  }
+
   async function deleteBeer(id) {
     const res = await fetch(`/api/beers/${id}`, { method: 'DELETE' })
     if (!res.ok) return
@@ -1975,6 +2007,7 @@ export default function App() {
             onSync={syncVinbudin}
             syncing={syncing}
             onEnrich={runEnrich}
+            onReEnrichRated={reEnrichRated}
             enrichState={enrichState}
           />
           <CountriesSection beers={allBeers} />
