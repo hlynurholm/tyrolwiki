@@ -258,11 +258,10 @@ function BeerDetailModal({ rec, onClose, zIndex = 400, topFlavors = [] }) {
         background: dark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.4)',
         backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
         overflowY: 'auto',
-        display: 'flex', justifyContent: 'center',
         padding: isMobile ? '12px 10px 60px' : '24px 16px 60px',
       }}
     >
-      <div style={{ width: '100%', maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ width: '100%', maxWidth: 560, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
 
         {/* ── header card ── */}
         <div style={{ ...GLASS, background: dark ? 'var(--glass-bg)' : '#ffffff', borderRadius: 20, overflow: 'hidden' }}>
