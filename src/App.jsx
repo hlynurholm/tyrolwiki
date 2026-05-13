@@ -446,6 +446,7 @@ function BeerDetailModal({ rec, onClose, zIndex = 400, topFlavors = [] }) {
 
 // ── ADD BEER FORM ─────────────────────────────────────────────────────────────
 function AddBeerForm({ beers, onAdd, onUpdate }) {
+  const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
   const blank = { name: '', style: '', brewery: '', country: '', abv: '', rater: '', rating: '' }
   const [form, setForm] = useState(blank)
@@ -454,6 +455,8 @@ function AddBeerForm({ beers, onAdd, onUpdate }) {
   const styleOpts   = useMemo(() => [...new Set(beers.map(b => b.style).filter(Boolean).sort())], [beers])
   const breweryOpts = useMemo(() => [...new Set(beers.map(b => b.brewery).filter(Boolean).sort())], [beers])
   const countryOpts = useMemo(() => [...new Set(beers.map(b => b.country).filter(Boolean).sort())], [beers])
+
+  const isNewBrewery = !matched && form.brewery.trim() && !breweryOpts.some(b => b.toLowerCase() === form.brewery.trim().toLowerCase())
 
   function set(k, v) { setForm(f => ({ ...f, [k]: v })) }
 
@@ -508,13 +511,13 @@ function AddBeerForm({ beers, onAdd, onUpdate }) {
     background: 'var(--input-bg)',
     border: '1px solid var(--border-mid)',
     borderRadius: 10,
-    padding: '9px 13px',
-    fontSize: 13, color: 'var(--text)',
+    padding: isMobile ? '12px 14px' : '9px 13px',
+    fontSize: isMobile ? 16 : 13, color: 'var(--text)',
     fontFamily: 'inherit', outline: 'none', width: '100%',
     caretColor: '#ff9f0a',
     transition: 'border-color 0.15s',
   }
-  const lbl = { fontSize: 10, color: 'var(--text-dim)', letterSpacing: 2, display: 'block', marginBottom: 6, fontWeight: 600 }
+  const lbl = { fontSize: 11, color: 'var(--text-dim)', letterSpacing: 2, display: 'block', marginBottom: 6, fontWeight: 600 }
   const selectedRaterColor = form.rater ? RATER_COLORS[form.rater] : null
 
   return (
@@ -548,7 +551,7 @@ function AddBeerForm({ beers, onAdd, onUpdate }) {
             </div>
           )}
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 0.6fr', gap: 12, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr 1fr 0.6fr', gap: isMobile ? 14 : 12, marginBottom: 16 }}>
               <div>
                 <label style={lbl}>Beer Name</label>
                 <input
@@ -559,11 +562,21 @@ function AddBeerForm({ beers, onAdd, onUpdate }) {
               </div>
               {[
                 { key: 'style', label: 'Style', list: 'dl-styles', ph: 'IPA, Lager…' },
-                { key: 'brewery', label: 'Brewery', list: 'dl-breweries', ph: '' },
+                { key: 'brewery', label: 'Brewery', list: 'dl-breweries', ph: 'existing or new…' },
                 { key: 'country', label: 'Country', list: 'dl-countries', ph: '' },
               ].map(({ key, label, list, ph }) => (
                 <div key={key}>
-                  <label style={lbl}>{label}</label>
+                  <label style={lbl}>
+                    {label}
+                    {key === 'brewery' && isNewBrewery && (
+                      <span style={{
+                        marginLeft: 6, fontSize: 9, fontWeight: 700, letterSpacing: 1,
+                        color: '#30d158', background: 'rgba(48,209,88,0.12)',
+                        border: '1px solid rgba(48,209,88,0.3)',
+                        borderRadius: 4, padding: '1px 5px', verticalAlign: 'middle',
+                      }}>NEW</span>
+                    )}
+                  </label>
                   <input
                     list={list}
                     style={{ ...inp, opacity: matched ? 0.6 : 1 }}
@@ -587,7 +600,7 @@ function AddBeerForm({ beers, onAdd, onUpdate }) {
             <datalist id="dl-breweries">{breweryOpts.map(b => <option key={b} value={b} />)}</datalist>
             <datalist id="dl-countries">{countryOpts.map(c => <option key={c} value={c} />)}</datalist>
             <div style={{ height: 1, background: 'var(--border)', margin: '4px 0 16px' }} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 12, alignItems: 'end' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr auto', gap: isMobile ? 14 : 12, alignItems: 'end' }}>
               <div>
                 <label style={lbl}>Who are you?</label>
                 <select
@@ -618,10 +631,11 @@ function AddBeerForm({ beers, onAdd, onUpdate }) {
               </div>
               <button type="submit" style={{
                 background: 'linear-gradient(135deg, #ff9f0a, #ff6b00)',
-                border: 'none', borderRadius: 10, padding: '10px 24px',
-                fontSize: 13, fontWeight: 700, color: '#ffffff',
+                border: 'none', borderRadius: 10, padding: isMobile ? '14px 24px' : '10px 24px',
+                fontSize: isMobile ? 15 : 13, fontWeight: 700, color: '#ffffff',
                 boxShadow: '0 0 20px rgba(255,159,10,0.4), 0 4px 12px rgba(0,0,0,0.15)',
                 cursor: 'pointer', whiteSpace: 'nowrap', alignSelf: 'end',
+                width: isMobile ? '100%' : undefined,
               }}>
                 {matched ? 'Add Rating' : 'Add Beer'}
               </button>
