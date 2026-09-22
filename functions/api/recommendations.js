@@ -244,7 +244,7 @@ function scoreRecommendations(vinbudinBeers, triedBeers, filterBeers) {
     if ((famCounts[rec._fam] ?? 0) >= 5) return false
     famCounts[rec._fam] = (famCounts[rec._fam] ?? 0) + 1
     return true
-  }).slice(0, 20).map(({ _fam, ...rest }) => rest)
+  }).slice(0, 20).map(rec => { delete rec._fam; return rec })
 
   // Full shuffle
   for (let i = capped.length - 1; i > 0; i--) {

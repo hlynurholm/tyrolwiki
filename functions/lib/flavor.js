@@ -70,21 +70,23 @@ export function extractTags(description) {
 }
 
 // Style family map (normalized lowercase keys)
+// Order matters: first family whose token appears in the style wins, so specific
+// families come before the greedy 'ale' entry in pale ale.
 export const STYLE_FAMILIES = {
-  lager:    ['lager', 'light lager', 'pilsner', 'rice lager', 'zwickel', 'marzen', 'bock', 'dunkel', 'european dark lager', 'annarll'],
-  ipa:      ['ipa', 'session ipa', 'neipa', 'double ipa', 'dipa', 'nedipa', 'milkshake ipa', 'belgian ipa', 'black ipa'],
-  'pale ale': ['pale ale', 'apa', 'golden ale', 'ale', 'kveik', 'saison', 'farmhouse ale', 'nordic saison', 'barleywine style ale'],
-  amber:    ['amber ale', 'red ale', 'irish red ale'],
   wheat:    ['wheat beer', 'hefeweizen', 'weizen', 'witbier', 'white ale', 'hveitibjor', 'annarhv'],
-  belgian:  ['belgian ale', 'blonde', 'tripel', 'dubbel', 'quadrupel', 'abbey ale', 'trappist'],
+  ipa:      ['ipa', 'session ipa', 'neipa', 'double ipa', 'dipa', 'nedipa', 'milkshake ipa', 'belgian ipa', 'black ipa'],
+  belgian:  ['belgian ale', 'blonde', 'tripel', 'dubbel', 'quadrupel', 'abbey ale', 'trappist', 'strong ale'],
   dark:     ['stout', 'porter', 'imperial stout', 'milk stout', 'oatmeal stout', 'schwarzbier'],
   sour:     ['sour', 'geuze', 'lambic', 'berliner weisse', 'gose', 'flanders'],
+  amber:    ['amber ale', 'red ale', 'irish red ale'],
+  lager:    ['lager', 'light lager', 'pilsner', 'rice lager', 'zwickel', 'marzen', 'bock', 'dunkel', 'european dark lager', 'annarll', 'kolsch', 'helles'],
+  'pale ale': ['pale ale', 'apa', 'golden ale', 'ale', 'kveik', 'saison', 'farmhouse ale', 'nordic saison', 'barleywine style ale'],
 }
 
 export function getStyleFamily(ns) {
   if (!ns) return null
   for (const [family, styles] of Object.entries(STYLE_FAMILIES)) {
-    if (styles.some(s => ns === s || ns.includes(s) || s.includes(ns))) return family
+    if (styles.some(s => ns === s || ns.includes(s))) return family
   }
   return null
 }

@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS beers (
   abv REAL,
   ratings TEXT NOT NULL DEFAULT '{}',
   avg REAL,
-  rating_count INTEGER NOT NULL DEFAULT 0
+  rating_count INTEGER NOT NULL DEFAULT 0,
+  description TEXT,
+  flavor_tags TEXT
 );
 
 CREATE TABLE IF NOT EXISTS vinbudin_beers (
@@ -18,5 +20,11 @@ CREATE TABLE IF NOT EXISTS vinbudin_beers (
   abv REAL,
   image_url TEXT,
   product_url TEXT,
-  synced_at TEXT NOT NULL
+  synced_at TEXT NOT NULL,
+  description TEXT,
+  flavor_tags TEXT,
+  in_stock INTEGER DEFAULT 1,
+  has_image INTEGER DEFAULT 1,
+  price REAL,
+  volume REAL
 );

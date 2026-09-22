@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "pages:dev": "wrangler pages dev --d1 DB=tyrolwiki ./dist",
+    "pages:dev": "wrangler pages dev ./dist",
     "deploy": "npm run build && wrangler pages deploy ./dist"
   },
   "dependencies": {

@@ -1,27 +1,9 @@
+import { fetchCatalog, fetchCapitalStock, mapStyle, migrate, IMAGE_BASE, PRODUCT_BASE } from '../../lib/vinbudin.js'
+
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
-}
-
-const IMAGE_BASE = 'https://www.vinbudin.is/Portaldata/1/Resources/vorumyndir/medium'
-const PRODUCT_BASE = 'https://www.vinbudin.is/heim/vorur/stoek-vara.aspx/?productid='
-const API_URL = 'https://www.vinbudin.is/addons/origo/module/ajaxwebservices/search.asmx/DoSearch?skip=0&count=99999&category=beer'
-
-// Map Vinbudin's TasteGroup2 codes to readable style names
-const STYLE_MAP = {
-  'PILSNER': 'Pilsner', 'LAGER': 'Lager', 'LITE': 'Light Lager',
-  'DUNKEL': 'Dunkel', 'BOCK': 'Bock', 'MARZEN': 'Märzen',
-  'NEIPA': 'NEIPA', 'IPA': 'IPA', 'DIPA': 'Double IPA',
-  'SESSION IPA': 'Session IPA', 'BLACK IPA': 'Black IPA',
-  'PALE ALE': 'Pale Ale', 'APA': 'APA', 'GOLDEN ALE': 'Golden Ale',
-  'AMBER ALE': 'Amber Ale', 'RED ALE': 'Red Ale', 'STOUT': 'Stout',
-  'PORTER': 'Porter', 'WHEAT': 'Wheat Beer', 'HEFEWEIZEN': 'Hefeweizen',
-  'WITBIER': 'Witbier', 'SAISON': 'Saison', 'FARMHOUSE': 'Farmhouse Ale',
-  'BELGIAN ALE': 'Belgian Ale', 'TRIPEL': 'Tripel', 'DUBBEL': 'Dubbel',
-  'QUADRUPEL': 'Quadrupel', 'BARLEYWINE': 'Barleywine', 'SOUR': 'Sour',
-  'GEUZE': 'Geuze', 'LAMBIC': 'Lambic', 'FRUIT': 'Fruit Beer',
-  'CIDER': 'Cider', 'ANNARHV': 'Wheat Beer', 'ANNARLL': 'Lager',
 }
 
 export async function onRequestOptions() {
@@ -29,59 +11,44 @@ export async function onRequestOptions() {
 }
 
 export async function onRequestPost({ env }) {
-  let products
+  let products, stock
   try {
-    const res = await fetch(API_URL, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Referer': 'https://www.vinbudin.is/heim/vorur/vorur.aspx/?category=beer',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-      },
-    })
-    if (!res.ok) throw new Error(`Vinbudin returned ${res.status}`)
-    const envelope = await res.json()
-    const inner = JSON.parse(envelope.d)
-    products = inner.data ?? inner.Products ?? []
+    await migrate(env)
+    ;[products, stock] = await Promise.all([fetchCatalog(), fetchCapitalStock()])
   } catch (err) {
     return Response.json({ error: `Failed to fetch from Vinbudin: ${err.message}` }, { status: 502, headers: CORS })
   }
 
-  // filter out kegs, gift packs, and special orders — just individual bottles/cans
+  // individual bottles/cans only — no kegs, gift boxes, special orders, multi-packs
   const bottles = products.filter(p => {
     const ct = (p.ProductContainerType ?? '').toUpperCase()
-    if (ct === 'KÚT.' || ct === 'KUT.' || ct === 'GIFT') return false
+    if (ct.startsWith('KÚT') || ct.startsWith('KUT') || ct === 'GIFT' || ct === 'ASKJA') return false
     if (p.ProductIsSpecialOrder) return false
-    // skip advent calendars and multi-packs by name
     const name = (p.ProductName ?? '').toLowerCase()
-    if (name.includes('advent') || name.includes('dagatal') || name.includes('gávupakk') || name.includes('pakki')) return false
-    return true
+    return !['advent', 'dagatal', 'gjafapakk', 'pakki'].some(w => name.includes(w))
   })
 
   const now = new Date().toISOString()
-
-  // clear old data before inserting fresh records
-  await env.DB.prepare('DELETE FROM vinbudin_beers').run()
-
-  const stmt = env.DB.prepare(
-    'INSERT INTO vinbudin_beers (id, name, brewery, style, abv, image_url, product_url, synced_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-  )
+  // upsert so description/flavor_tags from enrich survive a re-sync
+  const stmt = env.DB.prepare(`
+    INSERT INTO vinbudin_beers (id, name, brewery, style, abv, image_url, product_url, synced_at, in_stock, price, volume)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      name = excluded.name, brewery = excluded.brewery, style = excluded.style, abv = excluded.abv,
+      image_url = excluded.image_url, product_url = excluded.product_url, synced_at = excluded.synced_at,
+      in_stock = excluded.in_stock, price = excluded.price, volume = excluded.volume`)
 
   const batch = bottles.map(p => {
-    const id = String(p.ProductID ?? '')
-    const name = p.ProductName ?? ''
-    const brewery = p.ProductProducer ?? null
-    const rawStyle = (p.ProductTasteGroup2 ?? p.ProductSubCategory ?? '').toUpperCase().trim()
-    const style = STYLE_MAP[rawStyle] ?? (rawStyle ? rawStyle.charAt(0) + rawStyle.slice(1).toLowerCase() : null)
-    const abv = p.ProductAlchoholVolume ?? null
-    const imageUrl = id ? `${IMAGE_BASE}/${id}_r.jpg` : null
-    const productUrl = id ? `${PRODUCT_BASE}${id}/` : null
-    return stmt.bind(id, name, brewery, style, abv, imageUrl, productUrl, now)
+    const id = String(p.ProductID)
+    return stmt.bind(
+      id, p.ProductName ?? '', p.ProductProducer ?? null, mapStyle(p.ProductTasteGroup2),
+      p.ProductAlchoholVolume ?? null, `${IMAGE_BASE}/${id}_r.jpg`, `${PRODUCT_BASE}${id}/`, now,
+      stock.has(id) ? 1 : 0, p.ProductPrice ?? null, p.ProductBottledVolume ?? null,
+    )
   })
+  if (batch.length) await env.DB.batch(batch)
+  await env.DB.prepare('DELETE FROM vinbudin_beers WHERE synced_at != ?').bind(now).run()
 
-  if (batch.length > 0) {
-    await env.DB.batch(batch)
-  }
-
-  return Response.json({ ok: true, synced: batch.length, syncedAt: now }, { headers: CORS })
+  const inStock = batch.filter((_, i) => stock.has(String(bottles[i].ProductID))).length
+  return Response.json({ ok: true, synced: batch.length, inStock, syncedAt: now }, { headers: CORS })
 }

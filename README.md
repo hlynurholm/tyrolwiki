@@ -1,16 +1,18 @@
-# React + Vite
+# Café Tyrol Beer Wiki
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Beer rating site for the group, live at https://tyrolwiki.pages.dev.
 
-Currently, two official plugins are available:
+- **Frontend:** Vite + React, all in `src/App.jsx`.
+- **Backend:** Cloudflare Pages Functions in `functions/api/`, D1 database `tyrolwiki` (`schema.sql`).
+- **Recommendations:** Vínbúðin catalog + per-store stock via their search API, tasting notes scraped from product pages, scored as described in `algorithm explanation.txt`.
+- **Deploy:** push to `main` → GitHub Action runs `wrangler pages deploy`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Local dev
 
-## React Compiler
+```bash
+npm install
+npx wrangler d1 execute tyrolwiki --local --file schema.sql
+npm run build && npm run pages:dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Then in the UI press **Sync Vínbúðin** (fetches the catalog and stock, then enriches flavor tags).

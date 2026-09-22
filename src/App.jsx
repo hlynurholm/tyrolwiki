@@ -214,8 +214,6 @@ function BeerDetailModal({ rec, onClose, zIndex = 400, topFlavors = [] }) {
   const [pageLoading, setPageLoading] = useState(true)
 
   useEffect(() => {
-    setPageData(null)
-    setPageLoading(true)
     fetch(`/api/vinbudin/stock/${encodeURIComponent(rec.id)}`)
       .then(r => r.ok ? r.json() : null)
       .then(d => setPageData(d))
@@ -777,7 +775,6 @@ function RaterProfile({ rater, beers, onClose }) {
             }}>
               <div style={{ display: 'flex', gap: 12, padding: '14px 16px', width: 'max-content' }}>
                 {vinRecs.map(rec => {
-                  const rc = rec.relevance >= 80 ? '#30d158' : rec.relevance >= 65 ? '#ffd60a' : rec.relevance >= 50 ? '#ff9f0a' : '#8e8e93'
                   return (
                     <div
                       key={rec.id}
@@ -1033,7 +1030,6 @@ function StylesSection({ beers }) {
   const total = data.reduce((s, d) => s + d.count, 0)
   const sorted = [...data].filter(s => s.avg != null).sort((a, b) => (b.avg || 0) - (a.avg || 0))
 
-  const c = chartColors(dark)
   const chartData = {
     labels: sorted.map(s => trunc(s.style, 18)),
     datasets: [{
@@ -1427,7 +1423,7 @@ function BeerTable({ beers, onUpdate, onDelete }) {
               return (
                 <button key={key} onClick={() => handleSort(key)} style={{
                   padding: '5px 12px', borderRadius: 20, fontSize: 10, fontWeight: 700,
-                  cursor: 'pointer', letterSpacing: 0.3, border: 'none',
+                  cursor: 'pointer', letterSpacing: 0.3,
                   background: active ? 'var(--text-mid)' : 'var(--input-bg)',
                   color: active ? 'var(--bg)' : 'var(--text-dim)',
                   border: active ? 'none' : '1px solid var(--border-mid)',
@@ -1623,21 +1619,12 @@ function RecommendationsSection({ recommendations, syncedAt, total, topFlavors =
   const dark = useTheme()
   const [selectedRec, setSelectedRec] = useState(null)
 
-  function relevanceColor(r) {
-    if (r >= 80) return '#30d158'
-    if (r >= 65) return '#ffd60a'
-    if (r >= 50) return '#ff9f0a'
-    return '#8e8e93'
-  }
-
   const syncLabel = syncedAt
     ? `Synced ${new Date(syncedAt).toLocaleDateString('is-IS', { day: 'numeric', month: 'short', year: 'numeric' })}`
     : 'Never synced'
 
   const enrichLabel = enrichState.running
-    ? enrichState.phase === 'migrate' ? 'Migrating DB…'
-      : enrichState.phase === 'vb' ? `Enriching VB beers${enrichState.remaining != null ? ` (${enrichState.remaining} left)` : '…'}`
-      : 'Enriching rated beers…'
+    ? `Enriching ${enrichState.phase === 'vb' ? 'VB' : 'rated'} beers${enrichState.remaining != null ? ` (${enrichState.remaining} left)` : '…'}`
     : enrichState.done ? `Done — ${enrichState.enriched} enriched`
     : enrichState.error ? `Error: ${enrichState.error}`
     : 'Enrich flavor data'
@@ -1672,7 +1659,7 @@ function RecommendationsSection({ recommendations, syncedAt, total, topFlavors =
           <button
             onClick={onEnrich}
             disabled={enrichState.running}
-            title="Run DB migration + enrich all beers with flavor tags"
+            title="Scrape flavor tags for any beers missing them"
             style={{
               background: enrichState.done ? 'linear-gradient(135deg,#30d158,#1a8a36)' : enrichState.error ? 'linear-gradient(135deg,#ff375f,#c0003a)' : enrichState.running ? 'var(--input-bg)' : 'linear-gradient(135deg,#bf5af2,#7d1ab3)',
               border: '1px solid rgba(191,90,242,0.35)',
@@ -1827,27 +1814,30 @@ export default function App() {
     await runEnrich()
   }
 
+  async function enrichLoop(url, phase) {
+    let total = 0
+    while (true) {
+      const r = await fetch(url, { method: 'POST' })
+      if (!r.ok) throw new Error(`${phase} enrich failed`)
+      const d = await r.json()
+      total += d.enriched
+      setEnrichState(s => ({ ...s, phase, enriched: total, remaining: d.remaining ?? null }))
+      if (d.done) return total
+    }
+  }
+
+  async function refreshRecs() {
+    const fresh = await fetch('/api/recommendations')
+    if (fresh.ok) setRecs(await fresh.json())
+  }
+
   async function runEnrich() {
-    setEnrichState({ running: true, phase: 'migrate', enriched: 0, remaining: null, done: false, error: null })
+    setEnrichState({ running: true, phase: 'vb', enriched: 0, remaining: null, done: false, error: null })
     try {
-      await fetch('/api/migrate', { method: 'POST' })
-      setEnrichState(s => ({ ...s, phase: 'vb', enriched: 0 }))
-      let total = 0
-      while (true) {
-        const r = await fetch('/api/vinbudin/enrich', { method: 'POST' })
-        if (!r.ok) throw new Error('VB enrich failed')
-        const d = await r.json()
-        total += d.enriched
-        setEnrichState(s => ({ ...s, enriched: total, remaining: d.remaining ?? null }))
-        if (d.done) break
-      }
-      setEnrichState(s => ({ ...s, phase: 'rated' }))
-      const r2 = await fetch('/api/enrich-rated', { method: 'POST' })
-      if (!r2.ok) throw new Error('Rated enrich failed')
-      const d2 = await r2.json()
-      const fresh = await fetch('/api/recommendations')
-      if (fresh.ok) setRecs(await fresh.json())
-      setEnrichState(s => ({ ...s, running: false, done: true, enriched: total + (d2.enriched ?? 0) }))
+      const vb = await enrichLoop('/api/vinbudin/enrich', 'vb')
+      const rated = await enrichLoop('/api/enrich-rated', 'rated')
+      await refreshRecs()
+      setEnrichState(s => ({ ...s, running: false, done: true, enriched: vb + rated }))
     } catch (e) {
       setEnrichState(s => ({ ...s, running: false, error: e.message }))
     }
@@ -1857,12 +1847,9 @@ export default function App() {
     setEnrichState({ running: true, phase: 'rated', enriched: 0, remaining: null, done: false, error: null })
     try {
       await fetch('/api/reset-rated', { method: 'POST' })
-      const r = await fetch('/api/enrich-rated', { method: 'POST' })
-      if (!r.ok) throw new Error('Re-enrich failed')
-      const d = await r.json()
-      const fresh = await fetch('/api/recommendations')
-      if (fresh.ok) setRecs(await fresh.json())
-      setEnrichState(s => ({ ...s, running: false, done: true, enriched: d.enriched ?? 0 }))
+      const n = await enrichLoop('/api/enrich-rated', 'rated')
+      await refreshRecs()
+      setEnrichState(s => ({ ...s, running: false, done: true, enriched: n }))
     } catch (e) {
       setEnrichState(s => ({ ...s, running: false, error: e.message }))
     }

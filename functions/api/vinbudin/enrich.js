@@ -1,4 +1,5 @@
 import { extractTags } from '../../lib/flavor.js'
+import { fetchDescription } from '../../lib/vinbudin.js'
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -6,87 +7,35 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
-const BATCH = 20
-
-const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+const BATCH = 15 // 2 subrequests per beer; stay well under the Workers per-invocation limit
 
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS })
 }
 
+// Scrape tasting notes + verify image for beers not yet enriched. Call repeatedly until done.
 export async function onRequestPost({ env }) {
-  // Grab next batch of beers missing a description
   const { results: beers } = await env.DB.prepare(
     `SELECT id, image_url FROM vinbudin_beers WHERE description IS NULL ORDER BY id LIMIT ${BATCH}`
   ).all()
 
-  if (!beers || beers.length === 0) {
-    const { count } = await env.DB.prepare(
-      'SELECT COUNT(*) as count FROM vinbudin_beers'
-    ).first()
-    return Response.json({ enriched: 0, remaining: 0, total: count, done: true }, { headers: CORS })
-  }
+  const fetched = await Promise.allSettled(beers.map(async ({ id, image_url }) => {
+    const [desc, img] = await Promise.all([
+      fetchDescription(id),
+      fetch(image_url, { method: 'HEAD', redirect: 'manual' }).catch(() => null),
+    ])
+    // missing images redirect to a generic placeholder (or come back empty), so require a real 200 with a body
+    const hasImage = img?.status === 200 && Number(img.headers.get('content-length')) > 0 ? 1 : 0
+    return { id, desc: desc ?? '', tags: extractTags(desc), hasImage }
+  }))
 
-  // Fetch product pages and check image URLs concurrently
-  const fetched = await Promise.allSettled(
-    beers.map(async ({ id, image_url }) => {
-      const [res, imgRes] = await Promise.all([
-        fetch(
-          `https://www.vinbudin.is/heim/vorur/stoek-vara.aspx/?productid=${id}`,
-          { headers: { 'User-Agent': UA, Accept: 'text/html', 'Accept-Language': 'is,en;q=0.9' } }
-        ),
-        image_url ? fetch(image_url, { method: 'HEAD' }) : Promise.resolve({ ok: false }),
-      ])
-      if (!res.ok) {
-        // Mark unavailable so it doesn't block the queue
-        return { id, desc: '', tags: [], inStock: false, hasImage: false }
-      }
-      const html = await res.text()
-      const desc = extractDescription(html)
-      const inStock = isAvailable(html)
-      const hasImage = imgRes.ok
-      return { id, desc, tags: extractTags(desc), inStock, hasImage }
-    })
-  )
-
-  // Write results to DB
-  let enriched = 0
-  for (const r of fetched) {
-    if (r.status !== 'fulfilled' || !r.value) continue
-    const { id, desc, tags, inStock, hasImage } = r.value
-    try {
-      await env.DB.prepare(
-        'UPDATE vinbudin_beers SET description = ?, flavor_tags = ?, in_stock = ?, has_image = ? WHERE id = ?'
-      ).bind(desc ?? '', JSON.stringify(tags), inStock ? 1 : 0, hasImage ? 1 : 0, id).run()
-      enriched++
-    } catch (e) { /* skip */ }
-  }
+  const stmt = env.DB.prepare('UPDATE vinbudin_beers SET description = ?, flavor_tags = ?, has_image = ? WHERE id = ?')
+  const writes = fetched.filter(r => r.status === 'fulfilled')
+    .map(({ value: v }) => stmt.bind(v.desc, JSON.stringify(v.tags), v.hasImage, v.id))
+  if (writes.length) await env.DB.batch(writes)
 
   const { count: remaining } = await env.DB.prepare(
     'SELECT COUNT(*) as count FROM vinbudin_beers WHERE description IS NULL'
   ).first()
-
-  return Response.json({ enriched, remaining, done: remaining === 0 }, { headers: CORS })
-}
-
-function extractDescription(html) {
-  const m = html.match(/class="hidden entire-text"[^>]*>\s*<p>([\s\S]*?)<\/p>/i)
-  if (m) {
-    const text = m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
-    if (text.length > 5) return text
-  }
-  return null
-}
-
-function isAvailable(html) {
-  if (html.includes('Vara hættir')) return false
-  if (html.includes('Því miður er varan hvergi fáanleg')) return false
-  const tableMatch = html.match(/<table[^>]*TableStockStatusHofudborgarsvaedid[^>]*>([\s\S]*?)<\/table>/i)
-  if (!tableMatch) return false
-  const rowRe = /<a[^>]*>([^<]+)<\/a><\/td><td[^>]*stockstatus[^>]*>(\d+)\s+stykki/gi
-  let m
-  while ((m = rowRe.exec(tableMatch[1])) !== null) {
-    if (parseInt(m[2], 10) > 0) return true
-  }
-  return false
+  return Response.json({ enriched: writes.length, remaining, done: remaining === 0 }, { headers: CORS })
 }
