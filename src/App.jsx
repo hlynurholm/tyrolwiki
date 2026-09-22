@@ -1820,9 +1820,10 @@ export default function App() {
       const r = await fetch(url, { method: 'POST' })
       if (!r.ok) throw new Error(`${phase} enrich failed`)
       const d = await r.json()
+      if (d.done) return total
+      if (d.enriched === 0) throw new Error('Vínbúðin is rate-limiting us — try again in a few minutes')
       total += d.enriched
       setEnrichState(s => ({ ...s, phase, enriched: total, remaining: d.remaining ?? null }))
-      if (d.done) return total
     }
   }
 

@@ -7,7 +7,7 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
-const BATCH = 20
+const BATCH = 10 // fetched one at a time: Vínbúðin 429s on parallel bursts
 
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS })
@@ -21,14 +21,16 @@ export async function onRequestPost({ env }) {
     env.DB.prepare('SELECT id, name, brewery FROM vinbudin_beers').all(),
   ])
 
-  const results = await Promise.allSettled(beers.map(async beer => {
+  const done = []
+  for (const beer of beers) {
     const match = findBestMatch(beer, vbBeers)
-    const desc = match ? await fetchDescription(match.id) : null
-    return { id: beer.id, name: beer.name, matched: !!match, desc: desc ?? '', tags: extractTags(desc) }
-  }))
+    try {
+      const desc = match ? await fetchDescription(match.id) : null
+      done.push({ id: beer.id, name: beer.name, matched: !!match, desc: desc ?? '', tags: extractTags(desc) })
+    } catch { break } // rate limited: leave the rest NULL for the next call
+  }
 
   const stmt = env.DB.prepare('UPDATE beers SET description = ?, flavor_tags = ? WHERE id = ?')
-  const done = results.filter(r => r.status === 'fulfilled').map(r => r.value)
   if (done.length) await env.DB.batch(done.map(v => stmt.bind(v.desc, JSON.stringify(v.tags), v.id)))
 
   const { count: remaining } = await env.DB.prepare('SELECT COUNT(*) as count FROM beers WHERE description IS NULL').first()

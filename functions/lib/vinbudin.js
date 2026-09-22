@@ -63,16 +63,23 @@ export async function fetchCapitalStock() {
   return stock
 }
 
-// Product page still has the tasting notes; returns null when the page has none
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+
+// Product page still has the tasting notes; returns null when the page has none.
+// Vínbúðin rate-limits bursts (429), so back off and retry; throws if it never clears.
 export async function fetchDescription(id) {
-  const res = await fetch(`${PRODUCT_BASE}${id}`, {
-    headers: { 'User-Agent': UA, Accept: 'text/html', 'Accept-Language': 'is,en;q=0.9' },
-  })
-  if (!res.ok) return null
-  const m = (await res.text()).match(/class="hidden entire-text"[^>]*>\s*<p>([\s\S]*?)<\/p>/i)
-  if (!m) return null
-  const text = m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
-  return text.length > 5 ? text : null
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const res = await fetch(`${PRODUCT_BASE}${id}`, {
+      headers: { 'User-Agent': UA, Accept: 'text/html', 'Accept-Language': 'is,en;q=0.9' },
+    })
+    if (res.status === 429) { await sleep(1500 * (attempt + 1)); continue }
+    if (!res.ok) return null
+    const m = (await res.text()).match(/class="hidden entire-text"[^>]*>\s*<p>([\s\S]*?)<\/p>/i)
+    if (!m) return null
+    const text = m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+    return text.length > 5 ? text : null
+  }
+  throw new Error('rate limited')
 }
 
 // Idempotent column additions; "duplicate column" means already applied
